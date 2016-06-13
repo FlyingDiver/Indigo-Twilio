@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<Devices>
+	<Device type="custom" id="twilioNumber">
+		<Name>Twilio Number</Name>
+		<ConfigUI>
+			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+			<Field id="twilioNumber" type="textfield">
+				<Label>Twilio Phone Number:</Label>
+			</Field>
+			<Field id="delete" type="checkbox" defaultValue="true">
+				<Label>Delete:</Label>
+				<Description>Delete the SMS message after processing.</Description>
+			</Field>
+		</ConfigUI>
+		<States>
+			<State id="messageFrom">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Message From</TriggerLabel>
+				<ControlPageLabel>Message From</ControlPageLabel>
+			</State>
+			<State id="messageTo">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Message To</TriggerLabel>
+				<ControlPageLabel>Message To</ControlPageLabel>
+			</State>
+			<State id="messageText">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Message Text</TriggerLabel>
+				<ControlPageLabel>Message Text</ControlPageLabel>
+			</State>
+			<State id="regexMatch">
+				<ValueType>String</ValueType>
+				<TriggerLabel>RegEx Match Result</TriggerLabel>
+				<ControlPageLabel>>RegEx Match Result</ControlPageLabel>
+			</State>
+		</States>
+	</Device>
+</Devices>

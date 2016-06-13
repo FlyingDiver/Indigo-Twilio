@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Events>
+	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+    <Event id="patternMatch">
+        <Name>Pattern Match in SMS Message</Name>
+		<ConfigUI>
+        	<Field id="twilioNumber" type="menu">
+            	<Label>Twilio Number:</Label>
+            	<List class="self" filter="" method="pickTwilioNumber" dynamicReload="true"/>
+			</Field>			
+			<Field id="matchType" type="menu" defaultValue="simpleMatch">
+				<Label>Match type:</Label>
+				<List>
+					<Option value="simpleMatch">Included In</Option>
+					<Option value="exactMatch">Exact String</Option>
+					<Option value="regexMatch">Regular Expression</Option>
+				</List>
+			</Field>			
+			<Field type="menu" id="matchField" defaultValue="messageText">
+				<Label>Match in:</Label>
+				<List>
+					<Option value="messageText">Message Text</Option>
+					<Option value="messageTo">Message To</Option>
+					<Option value="messageFrom">Message From</Option>
+				</List>
+			</Field>			
+			<Field id="matchString" type="textfield">
+				<Label>Match String:</Label>
+			</Field>
+			<Field id="simpleSeparator2" type="separator"/>
+			<Field id="matchNote" type="label" fontSize="small" fontColor="darkgray">
+				<Label>"Included In" matches if the given string is anywhere in the received message.  "Exact String" matches if the string is identical to the received message.</Label>
+			</Field>
+			<Field id="regexNote" type="label" fontSize="small" fontColor="darkgray">
+				<Label>For information on how to construct regular expressions, visit http://www.regular-expressions.info/tutorial.html</Label>
+			</Field>
+		</ConfigUI>
+    </Event>
+</Events>
+
+
