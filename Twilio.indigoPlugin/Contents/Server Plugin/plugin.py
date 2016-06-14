@@ -13,7 +13,8 @@ from ghpu import GitHubPluginUpdater
 
 kCurDevVersCount = 0		# current version of plugin devices			
 
-kAnyDevice	= "ANYDEVICE"
+kAnyDevice		= "ANYDEVICE"
+kOtherContact	= "OTHER-NON-CONTACT"
 
 ################################################################################
 class Plugin(indigo.PluginBase):
@@ -221,19 +222,51 @@ class Plugin(indigo.PluginBase):
 
 	def sendSMSAction(self, pluginAction):
 		smsDevice = indigo.devices[pluginAction.deviceId]
-		smsTo = pluginAction.props["smsTo"]
 		smsMessage = pluginAction.props["smsMessage"]
+		if pluginAction.props["twilioContact"] == kOtherContact:
+			smsTo = pluginAction.props["smsTo"]
+		else:
+			contactID = int(pluginAction.props["twilioContact"])
+			contactDevice = indigo.devices[contactID]
+			smsTo = contactDevice.pluginProps['contactNumber']
 		self.sendSMS(smsDevice, smsTo, smsMessage)
 
 	def sendSMS(self, smsDevice, smsTo, smsMessage):
 		smsNumber = smsDevice.pluginProps['twilioNumber']
-		fullMessage = indigo.activePlugin.substitute(smsMessage)
+		to = indigo.activePlugin.substitute(smsTo)
+		message = indigo.activePlugin.substitute(smsMessage)
 		
 		try:
-			self.debugLog(u"sendSMS message '" + fullMessage + "' to " + smsTo + " using " + smsDevice.name)
-			self.twilioClient.messages.create(to=smsTo, from_=smsNumber, body=fullMessage) 
+			self.debugLog(u"sendSMS message '" + message + "' to " + to + " using " + smsDevice.name)
+			self.twilioClient.messages.create(to=to, from_=smsNumber, body=message) 
 		except TwilioRestException as e:
 			self.debugLog(u"sendSMS twilioClient.messages.create error: %s" % e)
+
+	########################################
+
+	def sendMMSAction(self, pluginAction):
+		mmsDevice = indigo.devices[pluginAction.deviceId]
+		mmsMessage = pluginAction.props["mmsMessage"]
+		mmsUrl = pluginAction.props["mmsUrl"]
+		if pluginAction.props["twilioContact"] == kOtherContact:
+			mmsTo = pluginAction.props["mmsTo"]
+		else:
+			contactID = int(pluginAction.props["twilioContact"])
+			contactDevice = indigo.devices[contactID]
+			mmsTo = contactDevice.pluginProps['contactNumber']
+		self.sendMMS(mmsDevice, mmsTo, mmsMessage, mmsUrl)
+
+	def sendMMS(self, mmsDevice, mmsTo, mmsMessage, mmsUrl):
+		mmsNumber = mmsDevice.pluginProps['twilioNumber']
+		to = indigo.activePlugin.substitute(mmsTo)
+		message = indigo.activePlugin.substitute(mmsMessage)
+		url = indigo.activePlugin.substitute(mmsUrl)
+		
+		try:
+			self.debugLog(u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + url)
+			self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=url) 
+		except TwilioRestException as e:
+			self.debugLog(u"sendMMS twilioClient.messages.create error: %s" % e)
 
 	########################################
 
@@ -310,7 +343,13 @@ class Plugin(indigo.PluginBase):
 			
 		except TwilioRestException as e:
 			self.debugLog(u"checkMessages twilioClient.messages.list error: %s" % e)
-					
+	
+	def listNotifications(self):
+		for notification in self.twilioClient.notifications.list():
+   			print notification.more_info
+			self.debugLog(u"listNotifications: Date: %s, Level: %s, Code: %s" % (notification.message_date, notification.log, notification.error_code))
+
+				
 	########################################
 	# Menu Methods
 	########################################
@@ -334,6 +373,17 @@ class Plugin(indigo.PluginBase):
 		retList =[(kAnyDevice, "Any")]
 		for dev in indigo.devices.iter("self"):
 			if (dev.deviceTypeId == "twilioNumber"): 
+				retList.append((dev.id,dev.name))
+		retList.sort(key=lambda tup: tup[1])
+		return retList
+
+	def pickTwilioContact(self, filter=None, valuesDict=None, typeId=0, targetId=0):
+		retList =[(kOtherContact, "Non-Contact Number")]
+		for dev in indigo.devices.iter("self"):
+			if (dev.deviceTypeId == "twilioContact"): 
+				contactDevice = indigo.devices[dev.id]
+				contactNumber = contactDevice.pluginProps['contactNumber']
+				self.debugLog("pickTwilioContact, dev.id = %s, dev.name = %s, contactNumber = %s" % (dev.id, dev.name, contactNumber))
 				retList.append((dev.id,dev.name))
 		retList.sort(key=lambda tup: tup[1])
 		return retList

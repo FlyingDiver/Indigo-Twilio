@@ -35,4 +35,24 @@
 			</State>
 		</States>
 	</Device>
+	<Device type="custom" id="twilioContact">
+		<Name>Twilio Contact</Name>
+		<ConfigUI>
+			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+			<Field id="contactNumber" type="textfield">
+				<Label>Contact Phone Number:</Label>
+			</Field>
+			<Field id="accessLevel" type="menu" defaultValue="none">
+				<Label>Access Level:</Label>
+				<List>
+					<Option value="none">No Access</Option>
+					<Option value="limited">Limited Access</Option>
+					<Option value="trusted">Trusted Access</Option>
+					<Option value="unlimited">Unlimited Access</Option>
+				</List>
+			</Field>			
+		</ConfigUI>
+		<States>
+		</States>
+	</Device>
 </Devices>

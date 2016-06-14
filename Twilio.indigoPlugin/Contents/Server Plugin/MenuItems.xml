@@ -15,6 +15,10 @@
 		<Name>Toggle Debugging</Name>
         <CallbackMethod>toggleDebugging</CallbackMethod>
 	</MenuItem>
+	<MenuItem id="listNotifications">
+		<Name>List Notifications to Log</Name>
+        <CallbackMethod>listNotifications</CallbackMethod>
+	</MenuItem>
 	<MenuItem id="titleSeparator1" type="separator" />
     <MenuItem id="checkForUpdates">
     	<Name>Check for Updates</Name>
