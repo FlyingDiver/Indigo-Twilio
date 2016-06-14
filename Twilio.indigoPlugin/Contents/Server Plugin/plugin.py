@@ -32,20 +32,21 @@ class Plugin(indigo.PluginBase):
 	def startup(self):
 		indigo.server.log(u"Starting Twilio")
 		
+		self.triggers = { }
+
 		self.updater = GitHubPluginUpdater(self)
 		self.updateFrequency = self.pluginPrefs.get('updateFrequency', 24)
 		if self.updateFrequency > 0:
 			self.next_update_check = time.time()
 
-		self.triggers = { }
-
-		self.accountSID = self.pluginPrefs.get('accountSID', None)
-		self.authToken = self.pluginPrefs.get('authToken', None)
-		self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
-
 		self.pollFrequency = self.pluginPrefs.get('pollFrequency', 10)
 		if self.pollFrequency > 0:
 			self.next_poll = time.time()
+
+		self.accountSID = self.pluginPrefs.get('accountSID', False)
+		self.authToken = self.pluginPrefs.get('authToken', False)
+		if self.accountSID and self.authToken:
+			self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
 
 
 	def shutdown(self):
@@ -62,12 +63,13 @@ class Plugin(indigo.PluginBase):
 						self.next_update_check = time.time() + float(self.pluginPrefs['updateFrequency']) * 60.0 * 60.0
 						self.updater.checkForUpdate()
 
-				if self.pollFrequency > 0:
-					if time.time() > self.next_poll:
-						self.next_poll = time.time() + float(self.pluginPrefs['pollFrequency']) * 60.0					
-						for dev in indigo.devices.iter("self"):
-							if (dev.deviceTypeId == "twilioNumber"): 
-								self.checkMessages(dev)
+				if self.twilioClient:
+					if self.pollFrequency > 0:
+						if time.time() > self.next_poll:
+							self.next_poll = time.time() + float(self.pluginPrefs['pollFrequency']) * 60.0					
+							for dev in indigo.devices.iter("self"):
+								if (dev.deviceTypeId == "twilioNumber"): 
+									self.checkMessages(dev)
 					
 				self.sleep(1.0) 
 								
@@ -162,9 +164,10 @@ class Plugin(indigo.PluginBase):
 			else:
 				self.debugLog(u"Debug logging disabled")
 
-			self.accountSID = valuesDict.get('accountSID', None)
-			self.authToken = valuesDict.get('authToken', None)
-			self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
+			self.accountSID = valuesDict.get('accountSID', False)
+			self.authToken = valuesDict.get('authToken', False)
+			if self.accountSID and self.authToken:
+				self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
 
 	########################################
 	# Called for each enabled Device belonging to plugin
