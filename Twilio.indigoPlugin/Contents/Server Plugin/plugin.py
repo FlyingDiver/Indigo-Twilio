@@ -5,6 +5,7 @@
 import sys
 import time
 from datetime import datetime
+import urllib
 
 from twilio.rest import TwilioRestClient 
 from twilio import TwilioRestException
@@ -228,8 +229,8 @@ class Plugin(indigo.PluginBase):
 		smsNumber = smsDevice.pluginProps['twilioNumber']
 		fullMessage = indigo.activePlugin.substitute(smsMessage)
 		
-		self.debugLog(u"sendSMS message '" + fullMessage + "' to " + smsTo + " using " + smsDevice.name)
 		try:
+			self.debugLog(u"sendSMS message '" + fullMessage + "' to " + smsTo + " using " + smsDevice.name)
 			self.twilioClient.messages.create(to=smsTo, from_=smsNumber, body=fullMessage) 
 		except TwilioRestException as e:
 			self.debugLog(u"sendSMS twilioClient.messages.create error: %s" % e)
@@ -245,11 +246,28 @@ class Plugin(indigo.PluginBase):
 	def voiceCall(self, callDevice, callTo, bucket):
 		callNumber = callDevice.pluginProps['twilioNumber']
 		callURL = "http://twimlets.com/holdmusic?Bucket=" + bucket
-		self.debugLog(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
 		try:
+			self.debugLog(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
 			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
 		except TwilioRestException as e:
 			self.debugLog(u"voiceCall twilioClient.calls.create error: %s" % e)
+
+	########################################
+
+	def voiceMessageAction(self, pluginAction):
+		callDevice = indigo.devices[pluginAction.deviceId]
+		callTo = pluginAction.props["callTo"]
+		messageText = pluginAction.props["messageText"]
+		self.voiceMessage(callDevice, callTo, messageText)
+
+	def voiceMessage(self, callDevice, callTo, messageText):
+		callNumber = callDevice.pluginProps['twilioNumber']
+		callURL = "http://twimlets.com/message?" + urllib.quote("Message[0]=" + messageText,"=")
+		try:
+			self.debugLog(u"voiceMessage call to " + callTo + " using " + callDevice.name + " with " + callURL)
+			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
+		except TwilioRestException as e:
+			self.debugLog(u"voiceMessage twilioClient.calls.create error: %s" % e)
 
 	########################################
 

@@ -38,6 +38,18 @@
 			</Field>			
 		</ConfigUI>
 	</Action>
+	<Action id="voiceMessage" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+		<Name>Place a Message Call</Name>
+		<CallbackMethod>voiceMessageAction</CallbackMethod>
+		<ConfigUI>
+			<Field id="callTo" type="textfield">
+				<Label>Call To:</Label>
+			</Field>
+			<Field id="messageText" type="textfield">
+				<Label>Message:</Label>
+			</Field>
+		</ConfigUI>
+	</Action>
 	<Action id="checkMessages" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>
