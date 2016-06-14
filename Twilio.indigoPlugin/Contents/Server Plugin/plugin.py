@@ -229,7 +229,24 @@ class Plugin(indigo.PluginBase):
 		try:
 			self.twilioClient.messages.create(to=smsTo, from_=smsNumber, body=fullMessage) 
 		except TwilioRestException as e:
-			self.debugLog(u"sendSMSAction twilioClient.messages.create error: %s" % e)
+			self.debugLog(u"sendSMS twilioClient.messages.create error: %s" % e)
+
+	########################################
+
+	def voiceCallAction(self, pluginAction):
+		callDevice = indigo.devices[pluginAction.deviceId]
+		callTo = pluginAction.props["callTo"]
+		bucket = pluginAction.props["bucket"]
+		self.voiceCall(callDevice, callTo, bucket)
+
+	def voiceCall(self, callDevice, callTo, bucket):
+		callNumber = callDevice.pluginProps['twilioNumber']
+		callURL = "http://twimlets.com/holdmusic?Bucket=" + bucket
+		self.debugLog(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
+		try:
+			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
+		except TwilioRestException as e:
+			self.debugLog(u"voiceCall twilioClient.calls.create error: %s" % e)
 
 	########################################
 

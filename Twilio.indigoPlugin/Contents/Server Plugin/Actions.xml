@@ -17,6 +17,27 @@
 			</Field>
 		</ConfigUI>
 	</Action>
+	<Action id="voiceCall" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+		<Name>Place a Call</Name>
+		<CallbackMethod>voiceCallAction</CallbackMethod>
+		<ConfigUI>
+			<Field id="callTo" type="textfield">
+				<Label>Call To:</Label>
+			</Field>
+			<Field id="bucket" type="menu" defaultValue="com.twilio.music.ambient">
+				<Label>Hold Music Style:</Label>
+				<List>
+					<Option value="com.twilio.music.ambient">Ambient</Option>
+					<Option value="com.twilio.music.classical">Classical</Option>
+					<Option value="com.twilio.music.electronica">Electronica</Option>
+					<Option value="com.twilio.music.guitars">Guitars</Option>
+					<Option value="com.twilio.music.newage">New Age</Option>
+					<Option value="com.twilio.music.rock">Rock</Option>
+					<Option value="com.twilio.music.soft-rock">Soft Rock</Option>
+				</List>
+			</Field>			
+		</ConfigUI>
+	</Action>
 	<Action id="checkMessages" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>
