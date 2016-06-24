@@ -331,16 +331,20 @@ class Plugin(indigo.PluginBase):
 			self.checkMessages(dev)
 
 	def checkMessages(self, twilioDevice):
-		smsNumber = twilioDevice.pluginProps['twilioNumber']
+
+		if len(self.twilioClient.messages.list()) == 0:
+			self.debugLog(u"checkMessages: No messages to process")
+			return
+			
 		deleteMsgs = twilioDevice.pluginProps['delete']
 		lastMessageStamp =	datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"), '%Y-%m-%d %H:%M:%S')
 		messageStamp = lastMessageStamp
-		
+
 		try:
 			for message in self.twilioClient.messages.list():
 				self.debugLog(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (message.from_, message.to, message.direction, message.date_sent))
-				if message.date_sent > lastMessageStamp:
-					if message.date_sent > messageStamp:
+				if message.date_sent and (message.date_sent > lastMessageStamp):
+					if message.date_sent and (message.date_sent > messageStamp):
 						messageStamp = message.date_sent
 					if message.direction == "inbound":
 						twilioDevice.updateStateOnServer(key="messageFrom", value=message.from_)					
