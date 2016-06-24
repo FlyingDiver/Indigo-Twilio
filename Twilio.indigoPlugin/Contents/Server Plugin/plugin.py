@@ -112,8 +112,8 @@ class Plugin(indigo.PluginBase):
 					match = cPattern.search(device.states[field])
 					if match:
 						regexMatch = match.group()
-						self.debugLog("\tExecuting regexMatch Trigger %s (%d), match: %s" % (trigger.name, trigger.id, regexMatch))
-						device.updateStateOnServer(key="regexMatch", value=regexMatch)
+						self.debugLog("\tExecuting regexMatch Trigger %s (%d), match: %s" % (trigger.name, trigger.id, matchResult))
+						device.updateStateOnServer(key="matchResult", value=regexMatch)
 						indigo.trigger.execute(trigger)
 					else:
 						self.debugLog("\tNo regexMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
@@ -121,6 +121,7 @@ class Plugin(indigo.PluginBase):
 				elif matchType == "exactMatch":
 					if pattern == device.states[field]:
 						self.debugLog("\tExecuting exactMatch Trigger %s (%d)" % (trigger.name, trigger.id))
+						device.updateStateOnServer(key="matchResult", value=pattern)
 						indigo.trigger.execute(trigger)
 					else:
 						self.debugLog("\tNo exactMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
@@ -129,6 +130,7 @@ class Plugin(indigo.PluginBase):
 					if pattern in device.states[field]:
 						self.debugLog("\tExecuting simpleMatch Trigger %s (%d)" % (trigger.name, trigger.id))
 						indigo.trigger.execute(trigger)
+						device.updateStateOnServer(key="matchResult", value=pattern)
 					else:
 						self.debugLog("\tNo simpleMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
 						
@@ -239,8 +241,12 @@ class Plugin(indigo.PluginBase):
 		try:
 			self.debugLog(u"sendSMS message '" + message + "' to " + to + " using " + smsDevice.name)
 			self.twilioClient.messages.create(to=to, from_=smsNumber, body=message) 
+			smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
+			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
 			self.debugLog(u"sendSMS twilioClient.messages.create error: %s" % e)
+			smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
 	########################################
 
@@ -265,8 +271,12 @@ class Plugin(indigo.PluginBase):
 		try:
 			self.debugLog(u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + url)
 			self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=url) 
+			mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
+			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
 			self.debugLog(u"sendMMS twilioClient.messages.create error: %s" % e)
+			mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
 	########################################
 
@@ -282,8 +292,12 @@ class Plugin(indigo.PluginBase):
 		try:
 			self.debugLog(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
 			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
+			callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
+			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
 			self.debugLog(u"voiceCall twilioClient.calls.create error: %s" % e)
+			callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
 	########################################
 
@@ -299,8 +313,12 @@ class Plugin(indigo.PluginBase):
 		try:
 			self.debugLog(u"voiceMessage call to " + callTo + " using " + callDevice.name + " with " + callURL)
 			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
+			callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
+			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
 			self.debugLog(u"voiceMessage twilioClient.calls.create error: %s" % e)
+			callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
 	########################################
 
@@ -317,7 +335,6 @@ class Plugin(indigo.PluginBase):
 		deleteMsgs = twilioDevice.pluginProps['delete']
 		lastMessageStamp =	datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"), '%Y-%m-%d %H:%M:%S')
 		messageStamp = lastMessageStamp
-		self.debugLog(u"checkMessages: lastMessageStamp: %s" % str(lastMessageStamp))
 		
 		try:
 			for message in self.twilioClient.messages.list():
@@ -325,7 +342,6 @@ class Plugin(indigo.PluginBase):
 				if message.date_sent > lastMessageStamp:
 					if message.date_sent > messageStamp:
 						messageStamp = message.date_sent
-						self.debugLog(u"checkMessages: new messageStamp: %s" % str(messageStamp))
 					if message.direction == "inbound":
 						twilioDevice.updateStateOnServer(key="messageFrom", value=message.from_)					
 						twilioDevice.updateStateOnServer(key="messageTo", value=message.to)					
@@ -338,12 +354,17 @@ class Plugin(indigo.PluginBase):
 					except TwilioRestException as e:
 						self.debugLog(u"checkMessages twilioClient.messages.delete error: %s" % e)
 
-			self.pluginPrefs[u"lastMessageStamp"] = messageStamp.strftime('%Y-%m-%d %H:%M:%S')
-			self.debugLog(u"checkMessages: lastMessageStamp: %s" % self.pluginPrefs[u"lastMessageStamp"])
-			
 		except TwilioRestException as e:
 			self.debugLog(u"checkMessages twilioClient.messages.list error: %s" % e)
+			twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
+			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 	
+		else:
+			self.pluginPrefs[u"lastMessageStamp"] = messageStamp.strftime('%Y-%m-%d %H:%M:%S')
+			twilioDevice.updateStateOnServer(key="numberStatus", value="Success")
+			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+			
+		
 	def listNotifications(self):
 		for notification in self.twilioClient.notifications.list():
    			print notification.more_info

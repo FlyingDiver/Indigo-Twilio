@@ -28,12 +28,18 @@
 				<TriggerLabel>Message Text</TriggerLabel>
 				<ControlPageLabel>Message Text</ControlPageLabel>
 			</State>
-			<State id="regexMatch">
+			<State id="matchResult">
 				<ValueType>String</ValueType>
-				<TriggerLabel>RegEx Match Result</TriggerLabel>
-				<ControlPageLabel>>RegEx Match Result</ControlPageLabel>
+				<TriggerLabel>Match Result</TriggerLabel>
+				<ControlPageLabel>Match Result</ControlPageLabel>
+			</State>
+			<State id="numberStatus">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Status</TriggerLabel>
+				<ControlPageLabel>Status</ControlPageLabel>
 			</State>
 		</States>
+    <UiDisplayStateId>numberStatus</UiDisplayStateId>
 	</Device>
 	<Device type="custom" id="twilioContact">
 		<Name>Twilio Contact</Name>
@@ -53,6 +59,12 @@
 			</Field>			
 		</ConfigUI>
 		<States>
+			<State id="contactStatus">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Status</TriggerLabel>
+				<ControlPageLabel>Status</ControlPageLabel>
+			</State>
 		</States>
 	</Device>
+    <UiDisplayStateId>contactStatus</UiDisplayStateId>
 </Devices>
