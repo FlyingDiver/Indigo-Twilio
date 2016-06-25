@@ -19,7 +19,11 @@ class TwilioRequestHandler(BaseRequestHandler):
 		BaseRequestHandler.__init__(self, logFunc, debugLogFunc)
 
 	def ping(self, **params):
-		cherrypy.server.indigoDb.VariableSetValue(cherrypy.server.indigoConn, "twilio_ping", "true")
+		if len(cherrypy.request.params.items()) > 0:
+			for param, value in cherrypy.request.params.items():
+				cherrypy.server.indigoDb.VariableSetValue(cherrypy.server.indigoConn, param, value)
+		else:
+			cherrypy.server.indigoDb.VariableSetValue(cherrypy.server.indigoConn, "twilio_ping", "true")
 		return
 		
 	ping.exposed = True
