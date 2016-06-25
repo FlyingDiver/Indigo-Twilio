@@ -37,13 +37,12 @@ class Plugin(indigo.PluginBase):
 		self.triggers = { }
 
 		self.updater = GitHubPluginUpdater(self)
-		self.updateFrequency = self.pluginPrefs.get('updateFrequency', 24)
-		if self.updateFrequency > 0:
-			self.next_update_check = time.time()
 
-		self.pollFrequency = self.pluginPrefs.get('pollFrequency', 10)
-		if self.pollFrequency > 0:
-			self.next_poll = time.time()
+		self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
+		self.next_update_check = time.time()
+
+		self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
+		self.next_poll = time.time()
 
 		self.accountSID = self.pluginPrefs.get('accountSID', False)
 		self.authToken = self.pluginPrefs.get('authToken', False)
@@ -60,20 +59,18 @@ class Plugin(indigo.PluginBase):
 		try:
 			while True:
 											
-				if self.updateFrequency > 0:
-					if time.time() > self.next_update_check:
-						self.next_update_check = time.time() + float(self.pluginPrefs['updateFrequency']) * 60.0 * 60.0
-						self.updater.checkForUpdate()
+				if (self.updateFrequency > 0.0) and (time.time() > self.next_update_check):
+					self.next_update_check = time.time() + self.updateFrequency
+					self.updater.checkForUpdate()
 
 				if self.twilioClient:
-					if self.pollFrequency > 0:
-						if time.time() > self.next_poll:
-							self.next_poll = time.time() + float(self.pluginPrefs['pollFrequency']) * 60.0					
-							for dev in indigo.devices.iter("self"):
-								if (dev.deviceTypeId == "twilioNumber"): 
-									self.checkMessages(dev)
+					if (self.pollFrequency > 0.0) and (time.time() > self.next_poll):
+						self.next_poll = time.time() + self.pollFrequency					
+						for dev in indigo.devices.iter("self"):
+							if (dev.deviceTypeId == "twilioNumber"): 
+								self.checkMessages(dev)
 					
-				self.sleep(1.0) 
+				self.sleep(60.0) 
 								
 		except self.stopThread:
 			pass	  
@@ -332,9 +329,9 @@ class Plugin(indigo.PluginBase):
 
 	def checkMessages(self, twilioDevice):
 
-		if len(self.twilioClient.messages.list()) == 0:
-			self.debugLog(u"checkMessages: No messages to process")
-			return
+#		if len(self.twilioClient.messages.list()) == 0:
+#			self.debugLog(u"checkMessages: No messages to process")
+#			return
 			
 		deleteMsgs = twilioDevice.pluginProps['delete']
 		lastMessageStamp =	datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"), '%Y-%m-%d %H:%M:%S')
@@ -356,10 +353,10 @@ class Plugin(indigo.PluginBase):
 					try:
 						self.twilioClient.messages.delete(message.sid)
 					except TwilioRestException as e:
-						self.debugLog(u"checkMessages twilioClient.messages.delete error: %s" % e)
+						self.debugLog(u"checkMessages: twilioClient.messages.delete error: %s" % e)
 
 		except TwilioRestException as e:
-			self.debugLog(u"checkMessages twilioClient.messages.list error: %s" % e)
+			self.debugLog(u"checkMessages: twilioClient.messages.list error: %s" % e)
 			twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
 			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 	
@@ -367,6 +364,7 @@ class Plugin(indigo.PluginBase):
 			self.pluginPrefs[u"lastMessageStamp"] = messageStamp.strftime('%Y-%m-%d %H:%M:%S')
 			twilioDevice.updateStateOnServer(key="numberStatus", value="Success")
 			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+			self.debugLog(u"checkMessages: Done")
 			
 		
 	def listNotifications(self):
