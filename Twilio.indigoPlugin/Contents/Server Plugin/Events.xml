@@ -36,6 +36,15 @@
 			</Field>
 		</ConfigUI>
     </Event>
+    <Event id="messageReceived">
+        <Name>SMS Message Received</Name>
+		<ConfigUI>
+        	<Field id="twilioNumber" type="menu">
+            	<Label>Twilio Number:</Label>
+            	<List class="self" filter="" method="pickTwilioNumber" dynamicReload="true"/>
+			</Field>
+		</ConfigUI>
+    </Event>
 </Events>
 
 

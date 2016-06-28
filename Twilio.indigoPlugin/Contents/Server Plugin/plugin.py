@@ -95,10 +95,10 @@ class Plugin(indigo.PluginBase):
 			if (trigger.pluginProps["twilioNumber"] != str(device.id)) and (trigger.pluginProps["twilioNumber"] != kAnyDevice):
 				self.debugLog("\t\tSkipping Trigger %s (%s), wrong device: %s" % (trigger.name, trigger.id, device.id))
 
-			elif trigger.pluginTypeId != "patternMatch":
-				self.debugLog("\tUnknown Trigger Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
-			
-			else:
+			if trigger.pluginTypeId == "messageReceived":
+				indigo.trigger.execute(trigger)
+
+			elif trigger.pluginTypeId == "patternMatch":
 				matchType= trigger.pluginProps["matchType"]
 				field = trigger.pluginProps["matchField"]
 				pattern = trigger.pluginProps["matchString"]
@@ -133,6 +133,10 @@ class Plugin(indigo.PluginBase):
 						
 				else:
 					self.debugLog("\tUnknown Match Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+
+			else:
+				self.debugLog("\tUnknown Trigger Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+			
 			
 	
 	####################
