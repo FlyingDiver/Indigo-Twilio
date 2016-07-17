@@ -367,6 +367,8 @@ class Plugin(indigo.PluginBase):
 										{'key':'messageText', 'value':message.body} ]
 						twilioDevice.updateStatesOnServer(stateList)
 						self.triggerCheck(twilioDevice)
+						broadcastDict = {'messageFrom': message.from_, 'messageTo': message.to, 'messageText': message.body}
+						indigo.server.broadcastToSubscribers(u"messageReceived", broadcastDict)
 					
 				if deleteMsgs:
 					try:

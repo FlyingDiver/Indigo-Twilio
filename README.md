@@ -9,3 +9,13 @@ The twilio Python library is required.  To install, enter the following at a Ter
 	sudo pip install twilio
 
 
+### Broadcast Messages
+
+    PluginID: com.flyingdiver.indigoplugin.twilio
+    MessageType: messageReceived 
+    Returns dictionary:
+    {
+    	'messageFrom':  	<text string>,
+		'messageTo': 		<text string>,
+		'messageText': 		<text string>
+	}
