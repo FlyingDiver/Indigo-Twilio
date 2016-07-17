@@ -11,10 +11,6 @@
         <CallbackMethod>checkAllMessages</CallbackMethod>
 	</MenuItem>
 	<MenuItem id="titleSeparator0" type="separator" />
-	<MenuItem id="toggleDebugging">
-		<Name>Toggle Debugging</Name>
-        <CallbackMethod>toggleDebugging</CallbackMethod>
-	</MenuItem>
 	<MenuItem id="listNotifications">
 		<Name>List Notifications to Log</Name>
         <CallbackMethod>listNotifications</CallbackMethod>

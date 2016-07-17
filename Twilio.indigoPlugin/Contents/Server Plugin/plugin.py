@@ -6,6 +6,7 @@ import sys
 import time
 from datetime import datetime
 import urllib
+import logging
 
 from twilio.rest import TwilioRestClient 
 from twilio import TwilioRestException
@@ -24,34 +25,44 @@ class Plugin(indigo.PluginBase):
 	########################################
 	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
 		indigo.PluginBase.__init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
-		
-		self.debug = self.pluginPrefs.get(u"showDebugInfo", False)
-		self.debugLog(u"Debugging enabled")
+
+		pfmt = logging.Formatter('%(asctime)s.%(msecs)03d\t[%(levelname)8s] %(name)20s.%(funcName)-25s%(msg)s', datefmt='%Y-%m-%d %H:%M:%S')
+		self.plugin_file_handler.setFormatter(pfmt)
+
+		try:
+			self.logLevel = int(self.pluginPrefs[u"logLevel"])
+		except:
+			self.logLevel = logging.INFO
+		self.indigo_log_handler.setLevel(self.logLevel)
+		self.logger.debug(u"logLevel = " + str(self.logLevel))
 
 	def __del__(self):
 		indigo.PluginBase.__del__(self)
 
 	def startup(self):
-		indigo.server.log(u"Starting Twilio")
+		self.logger.info(u"Starting Twilio")
 		
 		self.triggers = { }
 
 		self.updater = GitHubPluginUpdater(self)
-
 		self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
+		self.logger.debug(u"updateFrequency = " + str(self.updateFrequency))
 		self.next_update_check = time.time()
 
 		self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
+		self.logger.debug(u"pollFrequency = " + str(self.pollFrequency))
 		self.next_poll = time.time()
 
 		self.accountSID = self.pluginPrefs.get('accountSID', False)
 		self.authToken = self.pluginPrefs.get('authToken', False)
 		if self.accountSID and self.authToken:
 			self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
-
+		else:
+			self.logger.warning(u"accountSID and/or authToken not set")
+		
 
 	def shutdown(self):
-		indigo.server.log(u"Shutting down Twilio")
+		self.logger.info(u"Shutting down Twilio")
 
 
 	def runConcurrentThread(self):
@@ -78,22 +89,22 @@ class Plugin(indigo.PluginBase):
 	####################
 
 	def triggerStartProcessing(self, trigger):
-		self.debugLog("Adding Trigger %s (%d) - %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+		self.logger.debug("Adding Trigger %s (%d) - %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
 		assert trigger.id not in self.triggers
 		self.triggers[trigger.id] = trigger
  
 	def triggerStopProcessing(self, trigger):
-		self.debugLog("Removing Trigger %s (%d)" % (trigger.name, trigger.id))
+		self.logger.debug("Removing Trigger %s (%d)" % (trigger.name, trigger.id))
 		assert trigger.id in self.triggers
 		del self.triggers[trigger.id] 
 		
 	def triggerCheck(self, device):
 
 		for triggerId, trigger in sorted(self.triggers.iteritems()):
-			self.debugLog("\tChecking Trigger %s (%s), Type: %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+			self.logger.debug("Checking Trigger %s (%s), Type: %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
 			
 			if (trigger.pluginProps["twilioNumber"] != str(device.id)) and (trigger.pluginProps["twilioNumber"] != kAnyDevice):
-				self.debugLog("\t\tSkipping Trigger %s (%s), wrong device: %s" % (trigger.name, trigger.id, device.id))
+				self.logger.debug("\tSkipping Trigger %s (%s), wrong device: %s" % (trigger.name, trigger.id, device.id))
 
 			if trigger.pluginTypeId == "messageReceived":
 				indigo.trigger.execute(trigger)
@@ -102,46 +113,46 @@ class Plugin(indigo.PluginBase):
 				matchType= trigger.pluginProps["matchType"]
 				field = trigger.pluginProps["matchField"]
 				pattern = trigger.pluginProps["matchString"]
-				self.debugLog("\tChecking field %s for pattern '%s' using %s" % (field, pattern, matchType))
+				self.logger.debug("\tChecking field %s for pattern '%s' using %s" % (field, pattern, matchType))
 				
 				if matchType == "regexMatch":
 					cPattern = re.compile(pattern)
 					match = cPattern.search(device.states[field])
 					if match:
 						regexMatch = match.group()
-						self.debugLog("\tExecuting regexMatch Trigger %s (%d), match: %s" % (trigger.name, trigger.id, matchResult))
+						self.logger.debug("\tExecuting regexMatch Trigger %s (%d), match: %s" % (trigger.name, trigger.id, matchResult))
 						device.updateStateOnServer(key="matchResult", value=regexMatch)
 						indigo.trigger.execute(trigger)
 					else:
-						self.debugLog("\tNo regexMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
+						self.logger.debug("\tNo regexMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
 						
 				elif matchType == "exactMatch":
 					if pattern == device.states[field]:
-						self.debugLog("\tExecuting exactMatch Trigger %s (%d)" % (trigger.name, trigger.id))
+						self.logger.debug("\tExecuting exactMatch Trigger %s (%d)" % (trigger.name, trigger.id))
 						device.updateStateOnServer(key="matchResult", value=pattern)
 						indigo.trigger.execute(trigger)
 					else:
-						self.debugLog("\tNo exactMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
+						self.logger.debug("\tNo exactMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
 						
 				elif matchType == "simpleMatch":
 					if pattern in device.states[field]:
-						self.debugLog("\tExecuting simpleMatch Trigger %s (%d)" % (trigger.name, trigger.id))
+						self.logger.debug("\tExecuting simpleMatch Trigger %s (%d)" % (trigger.name, trigger.id))
 						indigo.trigger.execute(trigger)
 						device.updateStateOnServer(key="matchResult", value=pattern)
 					else:
-						self.debugLog("\tNo simpleMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
+						self.logger.debug("\tNo simpleMatch Match for Trigger %s (%d)" % (trigger.name, trigger.id))
 						
 				else:
-					self.debugLog("\tUnknown Match Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+					self.logger.warning("\tUnknown Match Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
 
 			else:
-				self.debugLog("\tUnknown Trigger Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
+				self.logger.warning("\tUnknown Trigger Type %s (%d), %s" % (trigger.name, trigger.id, trigger.pluginTypeId))
 			
 			
 	
 	####################
 	def validatePrefsConfigUi(self, valuesDict):
-		self.debugLog(u"validatePrefsConfigUi called")
+		self.logger.debug(u"validatePrefsConfigUi called")
 		errorDict = indigo.Dict()
 
 		updateFrequency = int(valuesDict['updateFrequency'])
@@ -163,42 +174,53 @@ class Plugin(indigo.PluginBase):
 	########################################
 	def closedPrefsConfigUi(self, valuesDict, userCancelled):
 		if not userCancelled:
-			self.debug = valuesDict.get("showDebugInfo", False)
-			if self.debug:
-				self.debugLog(u"Debug logging enabled")
-			else:
-				self.debugLog(u"Debug logging disabled")
+			try:
+				self.logLevel = int(valuesDict[u"logLevel"])
+			except:
+				self.logLevel = logging.INFO
+			self.indigo_log_handler.setLevel(self.logLevel)
+			self.logger.debug(u"logLevel = " + str(self.logLevel))
 
 			self.accountSID = valuesDict.get('accountSID', False)
 			self.authToken = valuesDict.get('authToken', False)
 			if self.accountSID and self.authToken:
 				self.twilioClient = TwilioRestClient(self.accountSID, self.authToken) 
+			else:
+				self.logger.warning(u"accountSID and/or authToken not set")
+
+			self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
+			self.logger.debug(u"pollFrequency = " + str(self.pollFrequency))
+			self.next_poll = time.time()
+
+			self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
+			self.logger.debug(u"updateFrequency = " + str(self.updateFrequency))
+			self.next_update_check = time.time()
+
 
 	########################################
 	# Called for each enabled Device belonging to plugin
-	# Verify connectivity to servers and start polling IMAP/POP servers here
 	#
 	def deviceStartComm(self, device):
-		self.debugLog(u'Called deviceStartComm(self, device): %s (%s)' % (device.name, device.id))
+		self.logger.debug(u'Called deviceStartComm(self, device): %s (%s)' % (device.name, device.id))
 						
 		instanceVers = int(device.pluginProps.get('devVersCount', 0))
-		self.debugLog(device.name + u": Device Current Version = " + str(instanceVers))
+		self.logger.debug(device.name + u": Device Current Version = " + str(instanceVers))
 
 		if instanceVers >= kCurDevVersCount:
-			self.debugLog(device.name + u": Device Version is up to date")
+			self.logger.debug(device.name + u": Device Version is up to date")
 			
 		elif instanceVers < kCurDevVersCount:
 			newProps = device.pluginProps
 
 		else:
-			self.errorLog(u"Unknown device version: " + str(instanceVers) + " for device " + device.name)					
+			self.logger.warning(u"Unknown device version: " + str(instanceVers) + " for device " + device.name)					
 
 
 	########################################
 	# Terminate communication with servers
 	#
 	def deviceStopComm(self, device):
-		self.debugLog(u'Called deviceStopComm(self, device): %s (%s)' % (device.name, device.id))
+		self.logger.debug(u'Called deviceStopComm(self, device): %s (%s)' % (device.name, device.id))
 		
  
 	########################################
@@ -226,7 +248,8 @@ class Plugin(indigo.PluginBase):
 	def sendSMSAction(self, pluginAction):
 		smsDevice = indigo.devices[pluginAction.deviceId]
 		smsMessage = pluginAction.props["smsMessage"]
-		if pluginAction.props["twilioContact"] == kOtherContact:
+		contact = pluginAction.props.get("twilioContact", kOtherContact)
+		if contact == kOtherContact:
 			smsTo = pluginAction.props["smsTo"]
 		else:
 			contactID = int(pluginAction.props["twilioContact"])
@@ -240,12 +263,12 @@ class Plugin(indigo.PluginBase):
 		message = indigo.activePlugin.substitute(smsMessage)
 		
 		try:
-			self.debugLog(u"sendSMS message '" + message + "' to " + to + " using " + smsDevice.name)
+			self.logger.debug(u"sendSMS message '" + message + "' to " + to + " using " + smsDevice.name)
 			self.twilioClient.messages.create(to=to, from_=smsNumber, body=message) 
 			smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
 			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
-			self.debugLog(u"sendSMS twilioClient.messages.create error: %s" % e)
+			self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
 			smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
 			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -270,12 +293,12 @@ class Plugin(indigo.PluginBase):
 		url = indigo.activePlugin.substitute(mmsUrl)
 		
 		try:
-			self.debugLog(u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + url)
+			self.logger.debug(u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + url)
 			self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=url) 
 			mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
 			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
-			self.debugLog(u"sendMMS twilioClient.messages.create error: %s" % e)
+			self.logger.exception(u"sendMMS twilioClient.messages.create error: %s" % e)
 			mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
 			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -291,12 +314,12 @@ class Plugin(indigo.PluginBase):
 		callNumber = callDevice.pluginProps['twilioNumber']
 		callURL = "http://twimlets.com/holdmusic?Bucket=" + bucket
 		try:
-			self.debugLog(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
+			self.logger.debug(u"voiceCall call to " + callTo + " using " + callDevice.name + " with " + callURL)
 			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
 			callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
 			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
-			self.debugLog(u"voiceCall twilioClient.calls.create error: %s" % e)
+			self.logger.exception(u"voiceCall twilioClient.calls.create error: %s" % e)
 			callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
 			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -312,55 +335,50 @@ class Plugin(indigo.PluginBase):
 		callNumber = callDevice.pluginProps['twilioNumber']
 		callURL = "http://twimlets.com/message?" + urllib.quote("Message[0]=" + messageText,"=")
 		try:
-			self.debugLog(u"voiceMessage call to " + callTo + " using " + callDevice.name + " with " + callURL)
+			self.logger.debug(u"voiceMessage call to " + callTo + " using " + callDevice.name + " with " + callURL)
 			self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
 			callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
 			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
-			self.debugLog(u"voiceMessage twilioClient.calls.create error: %s" % e)
+			self.logger.exception(u"voiceMessage twilioClient.calls.create error: %s" % e)
 			callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
 			callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
 	########################################
-
-	def checkMessagesAction(self, pluginAction):
-		twilioDevice = indigo.devices[pluginAction.deviceId]
+	
+	def checkMessagesAction(self, pluginAction, twilioDevice):
 		self.checkMessages(twilioDevice)
 	
-	def checkAllMessages(self):
-		for dev in indigo.devices.iter("self"):
-			self.checkMessages(dev)
-
 	def checkMessages(self, twilioDevice):
-
-#		if len(self.twilioClient.messages.list()) == 0:
-#			self.debugLog(u"checkMessages: No messages to process")
-#			return
 			
-		deleteMsgs = twilioDevice.pluginProps['delete']
+		deleteMsgs = twilioDevice.pluginProps.get('delete', False)
 		lastMessageStamp =	datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"), '%Y-%m-%d %H:%M:%S')
 		messageStamp = lastMessageStamp
 
 		try:
 			for message in self.twilioClient.messages.list():
-				self.debugLog(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (message.from_, message.to, message.direction, message.date_sent))
+				self.logger.debug(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (message.from_, message.to, message.direction, message.date_sent))
 				if message.date_sent and (message.date_sent > lastMessageStamp):
 					if message.date_sent and (message.date_sent > messageStamp):
 						messageStamp = message.date_sent
 					if message.direction == "inbound":
-						twilioDevice.updateStateOnServer(key="messageFrom", value=message.from_)					
-						twilioDevice.updateStateOnServer(key="messageTo", value=message.to)					
-						twilioDevice.updateStateOnServer(key="messageText", value=message.body)
+						stateList = [	{'key':'messageFrom', 'value':message.from_},
+										{'key':'messageTo',   'value':message.to},
+										{'key':'messageText', 'value':message.body} ]
+						twilioDevice.updateStatesOnServer(stateList)
 						self.triggerCheck(twilioDevice)
 					
 				if deleteMsgs:
 					try:
 						self.twilioClient.messages.delete(message.sid)
 					except TwilioRestException as e:
-						self.debugLog(u"checkMessages: twilioClient.messages.delete error: %s" % e)
+						if e[0:5] == "HTTP 4":
+							self.logger.warning	(u"checkMessages: twilioClient.messages.delete error: %s" % e)
+						else:
+							self.logger.exception(u"checkMessages: twilioClient.messages.delete error: %s" % e)
 
 		except TwilioRestException as e:
-			self.debugLog(u"checkMessages: twilioClient.messages.list error: %s" % e)
+			self.logger.exception(u"checkMessages: twilioClient.messages.list error: %s" % e)
 			twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
 			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 	
@@ -368,24 +386,24 @@ class Plugin(indigo.PluginBase):
 			self.pluginPrefs[u"lastMessageStamp"] = messageStamp.strftime('%Y-%m-%d %H:%M:%S')
 			twilioDevice.updateStateOnServer(key="numberStatus", value="Success")
 			twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-			self.debugLog(u"checkMessages: Done")
+			self.logger.debug(u"checkMessages: Done")
 			
 		
 	def listNotifications(self):
 		for notification in self.twilioClient.notifications.list():
    			print notification.more_info
-			self.debugLog(u"listNotifications: Date: %s, Level: %s, Code: %s" % (notification.message_date, notification.log, notification.error_code))
+			self.logger.debug(u"listNotifications: Date: %s, Level: %s, Code: %s" % (notification.message_date, notification.log, notification.error_code))
 
 				
 	########################################
 	# Menu Methods
 	########################################
-
-	def toggleDebugging(self):
-		self.debug = not self.debug
-		self.pluginPrefs["debugEnabled"] = self.debug
-		indigo.server.log("Debug set to: " + str(self.debug))
 		
+	def checkAllMessages(self):
+		for dev in indigo.devices.iter("self"):
+			if (dev.deviceTypeId == "twilioNumber"): 
+				self.checkMessages(dev)
+
 	def checkForUpdates(self):
 		self.updater.checkForUpdate()
 
@@ -400,6 +418,9 @@ class Plugin(indigo.PluginBase):
 		retList =[(kAnyDevice, "Any")]
 		for dev in indigo.devices.iter("self"):
 			if (dev.deviceTypeId == "twilioNumber"): 
+				twilioDevice = indigo.devices[dev.id]
+				twilioNumber = twilioDevice.pluginProps['twilioNumber']
+				self.logger.debug("pickTwilioNumber, dev.id = %s, dev.name = %s, twilioNumber = %s" % (dev.id, dev.name, twilioNumber))
 				retList.append((dev.id,dev.name))
 		retList.sort(key=lambda tup: tup[1])
 		return retList
@@ -410,7 +431,7 @@ class Plugin(indigo.PluginBase):
 			if (dev.deviceTypeId == "twilioContact"): 
 				contactDevice = indigo.devices[dev.id]
 				contactNumber = contactDevice.pluginProps['contactNumber']
-				self.debugLog("pickTwilioContact, dev.id = %s, dev.name = %s, contactNumber = %s" % (dev.id, dev.name, contactNumber))
+				self.logger.debug("pickTwilioContact, dev.id = %s, dev.name = %s, contactNumber = %s" % (dev.id, dev.name, contactNumber))
 				retList.append((dev.id,dev.name))
 		retList.sort(key=lambda tup: tup[1])
 		return retList

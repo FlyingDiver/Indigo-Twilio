@@ -1,6 +1,15 @@
 <?xml version="1.0"?>
 <Events>
 	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+    <Event id="messageReceived">
+        <Name>SMS Message Received</Name>
+		<ConfigUI>
+        	<Field id="twilioNumber" type="menu">
+            	<Label>Twilio Number:</Label>
+            	<List class="self" filter="" method="pickTwilioNumber" dynamicReload="true"/>
+			</Field>
+		</ConfigUI>
+    </Event>
     <Event id="patternMatch">
         <Name>Pattern Match in SMS Message</Name>
 		<ConfigUI>
@@ -33,15 +42,6 @@
 			</Field>
 			<Field id="regexNote" type="label" fontSize="small" fontColor="darkgray">
 				<Label>For information on how to construct regular expressions, visit http://www.regular-expressions.info/tutorial.html</Label>
-			</Field>
-		</ConfigUI>
-    </Event>
-    <Event id="messageReceived">
-        <Name>SMS Message Received</Name>
-		<ConfigUI>
-        	<Field id="twilioNumber" type="menu">
-            	<Label>Twilio Number:</Label>
-            	<List class="self" filter="" method="pickTwilioNumber" dynamicReload="true"/>
 			</Field>
 		</ConfigUI>
     </Event>

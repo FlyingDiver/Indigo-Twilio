@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Actions>
 	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
-	<Action id="sendSMS" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+	<Action id="sendSMS" deviceFilter="self.twilioNumber">
 		<Name>Send Text Message (SMS)</Name>
 		<CallbackMethod>sendSMSAction</CallbackMethod>
 		<ConfigUI>
@@ -21,7 +21,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="sendMMS" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+	<Action id="sendMMS" deviceFilter="self.twilioNumber">
 		<Name>Send Picture Message (MMS)</Name>
 		<CallbackMethod>sendMMSAction</CallbackMethod>
 		<ConfigUI>
@@ -44,7 +44,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="voiceCall" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+	<Action id="voiceCall" deviceFilter="self.twilioNumber">
 		<Name>Place a Call</Name>
 		<CallbackMethod>voiceCallAction</CallbackMethod>
 		<ConfigUI>
@@ -65,7 +65,7 @@
 			</Field>			
 		</ConfigUI>
 	</Action>
-	<Action id="voiceMessage" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+	<Action id="voiceMessage" deviceFilter="self.twilioNumber">
 		<Name>Place a Message Call</Name>
 		<CallbackMethod>voiceMessageAction</CallbackMethod>
 		<ConfigUI>
@@ -77,7 +77,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="checkMessages" deviceFilter="self.twilioNumber" uiPath="DeviceActions">
+	<Action id="checkMessages" deviceFilter="self.twilioNumber">
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>
 	</Action>
