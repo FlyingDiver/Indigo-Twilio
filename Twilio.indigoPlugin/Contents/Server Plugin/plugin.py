@@ -271,6 +271,9 @@ class Plugin(indigo.PluginBase):
 			self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
 			smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
 			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+		else:
+			broadcastDict = {'messageFrom': smsNumber, 'messageTo': to, 'messageText': message}
+			indigo.server.broadcastToSubscribers(u"messageSent", broadcastDict)
 
 	########################################
 
@@ -296,11 +299,14 @@ class Plugin(indigo.PluginBase):
 			self.logger.debug(u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + url)
 			self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=url) 
 			mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
-			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+			mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
 		except TwilioRestException as e:
 			self.logger.exception(u"sendMMS twilioClient.messages.create error: %s" % e)
 			mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
-			smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+			mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+		else:
+			broadcastDict = {'messageFrom': mmsNumber, 'messageTo': to, 'messageText': message}
+			indigo.server.broadcastToSubscribers(u"messageSent", broadcastDict)
 
 	########################################
 
@@ -437,19 +443,4 @@ class Plugin(indigo.PluginBase):
 				retList.append((dev.id,dev.name))
 		retList.sort(key=lambda tup: tup[1])
 		return retList
-
-
-	########################################
-	# ConfigUI methods
-	########################################
-
-
-	def validateActionConfigUi(self, valuesDict, typeId, actionId):
-		errorDict = indigo.Dict()
-
-		if len(errorDict) > 0:
-			return (False, valuesDict, errorDict)
-		else:
-			return (True, valuesDict)
-	
-
+		
