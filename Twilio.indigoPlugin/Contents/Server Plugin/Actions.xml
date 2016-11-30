@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Actions>
-	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=213</SupportURL>
 	<Action id="sendSMS" deviceFilter="self.twilioNumber">
 		<Name>Send Text Message (SMS)</Name>
 		<CallbackMethod>sendSMSAction</CallbackMethod>

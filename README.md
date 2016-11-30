@@ -7,6 +7,12 @@ This plugin uses the Twilio service to send and receive SMS messages.
 The twilio Python library is required.  To install, enter the following at a Terminal prompt.  You will need to enter your administrator password.
 
 	sudo pip install twilio
+	
+If you get an error saying pip is not installed, then do:
+
+	sudo easy_install pip
+	sudo pip install twilio
+
 
 ### Immediate Notifications
 
@@ -30,8 +36,6 @@ Now, anytime an inbound SMS is received by the Twilio servers, that URL will be 
 
 ### Broadcast Messages
 
-    PluginID: com.flyingdiver.indigoplugin.twilio
-
     MessageType: messageReceived 
     Returns dictionary:
     {
@@ -47,3 +51,5 @@ Now, anytime an inbound SMS is received by the Twilio servers, that URL will be 
 		'messageTo': 		<text string>,
 		'messageText': 		<text string>
 	}
+	
+**PluginID**: com.flyingdiver.indigoplugin.twilio

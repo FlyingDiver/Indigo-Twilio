@@ -3,7 +3,7 @@
 	<Device type="custom" id="twilioNumber">
 		<Name>Twilio Number</Name>
 		<ConfigUI>
-			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=213</SupportURL>
 			<Field id="twilioNumber" type="textfield">
 				<Label>Twilio Phone Number:</Label>
 			</Field>
@@ -44,7 +44,7 @@
 	<Device type="custom" id="twilioContact">
 		<Name>Twilio Contact</Name>
 		<ConfigUI>
-			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=177</SupportURL>
+			<SupportURL>http://forums.indigodomo.com/viewforum.php?f=213</SupportURL>
 			<Field id="contactNumber" type="textfield">
 				<Label>Contact Phone Number:</Label>
 			</Field>
