@@ -4,15 +4,10 @@ Plugin for the Indigo Home Automation system.
 
 This plugin uses the Twilio service to send and receive SMS messages.
 
-The twilio Python library is required.  To install, enter the following at a Terminal prompt.  You will need to enter your administrator password.
+The twilio Python library is now included with the plugin and does not need to be installed separately.  If you have previously installed the library and want to remove it, enter the following command.  You will need to enter your administrator password. This is totally optional.
 
-	sudo pip install twilio
+	sudo pip uninstall twilio
 	
-If you get an error saying pip is not installed, then do:
-
-	sudo easy_install pip
-	sudo pip install twilio
-
 
 ### Immediate Notifications
 
