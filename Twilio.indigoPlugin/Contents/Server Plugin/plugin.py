@@ -290,7 +290,7 @@ class Plugin(indigo.PluginBase):
         mmsNumber = mmsDevice.pluginProps['twilioNumber']
         to = indigo.activePlugin.substitute(mmsTo)
         message = indigo.activePlugin.substitute(mmsMessage)
-        url = indigo.activePlugin.substitute(mmsUrl)
+        urls = indigo.activePlugin.substitute(mmsUrl)
         urlList = urls.split(",")
 
         try:
