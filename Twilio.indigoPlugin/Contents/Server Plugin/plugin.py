@@ -5,11 +5,13 @@
 import sys
 import time
 from datetime import datetime
+import pytz
 import urllib
 import logging
 
-from twilio.rest import TwilioRestClient
-from twilio import TwilioRestException
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioException
+
 from ghpu import GitHubPluginUpdater
 
 kCurDevVersCount = 0        # current version of plugin devices
@@ -53,7 +55,7 @@ class Plugin(indigo.PluginBase):
         self.accountSID = self.pluginPrefs.get('accountSID', False)
         self.authToken = self.pluginPrefs.get('authToken', False)
         if self.accountSID and self.authToken:
-            self.twilioClient = TwilioRestClient(self.accountSID, self.authToken)
+            self.twilioClient = Client(self.accountSID, self.authToken)
         else:
             self.logger.warning(u"accountSID and/or authToken not set")
 
@@ -181,7 +183,7 @@ class Plugin(indigo.PluginBase):
             self.accountSID = valuesDict.get('accountSID', False)
             self.authToken = valuesDict.get('authToken', False)
             if self.accountSID and self.authToken:
-                self.twilioClient = TwilioRestClient(self.accountSID, self.authToken)
+                self.twilioClient = Client(self.accountSID, self.authToken)
             else:
                 self.logger.warning(u"accountSID and/or authToken not set")
 
@@ -264,7 +266,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.messages.create(to=to, from_=smsNumber, body=message)
             smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioRestException as e:
+        except TwilioException as e:
             self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
             smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -298,7 +300,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=urlList)
             mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioRestException as e:
+        except TwilioException as e:
             self.logger.exception(u"sendMMS twilioClient.messages.create error: %s" % e)
             mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -322,7 +324,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioRestException as e:
+        except TwilioException as e:
             self.logger.exception(u"voiceCall twilioClient.calls.create error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -343,7 +345,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioRestException as e:
+        except TwilioException as e:
             self.logger.exception(u"voiceMessage twilioClient.calls.create error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -362,9 +364,8 @@ class Plugin(indigo.PluginBase):
         try:
             for message in self.twilioClient.messages.list():
                 self.logger.debug(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (message.from_, message.to, message.direction, message.date_sent))
-                if message.date_sent and (message.date_sent > lastMessageStamp):
-                    if message.date_sent and (message.date_sent > messageStamp):
-                        messageStamp = message.date_sent
+                if message.date_sent and (message.date_sent.replace(tzinfo=pytz.UTC) > lastMessageStamp.replace(tzinfo=pytz.UTC)):
+                    messageStamp = message.date_sent
                     if message.direction == "inbound":
                         stateList = [   {'key':'messageFrom', 'value':message.from_},
                                         {'key':'messageTo',   'value':message.to},
@@ -376,14 +377,14 @@ class Plugin(indigo.PluginBase):
 
                 if deleteMsgs:
                     try:
-                        self.twilioClient.messages.delete(message.sid)
-                    except TwilioRestException as e:
+                        self.twilioClient.messages(message.sid).delete()
+                    except TwilioException as e:
                         if e[0:6] == "HTTP 4":
-                            self.logger.warning(u"checkMessages: twilioClient.messages.delete error: %s" % e)
+                            self.logger.warning(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
                         else:
-                            self.logger.exception(u"checkMessages: twilioClient.messages.delete error: %s" % e)
+                            self.logger.exception(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
 
-        except TwilioRestException as e:
+        except TwilioException as e:
             self.logger.exception(u"checkMessages: twilioClient.messages.list error: %s" % e)
             twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
             twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
