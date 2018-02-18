@@ -378,8 +378,8 @@ class Plugin(indigo.PluginBase):
                     try:
                         self.twilioClient.messages.delete(message.sid)
                     except TwilioRestException as e:
-                        if e[0:5] == "HTTP 4":
-                            self.logger.warning (u"checkMessages: twilioClient.messages.delete error: %s" % e)
+                        if e[0:6] == "HTTP 4":
+                            self.logger.warning(u"checkMessages: twilioClient.messages.delete error: %s" % e)
                         else:
                             self.logger.exception(u"checkMessages: twilioClient.messages.delete error: %s" % e)
 
