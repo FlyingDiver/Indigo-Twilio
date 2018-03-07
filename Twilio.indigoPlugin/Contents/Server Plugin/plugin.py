@@ -12,8 +12,6 @@ import logging
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
 
-from ghpu import GitHubPluginUpdater
-
 kCurDevVersCount = 0        # current version of plugin devices
 
 kAnyDevice      = "ANYDEVICE"
@@ -43,11 +41,6 @@ class Plugin(indigo.PluginBase):
 
         self.triggers = { }
 
-        self.updater = GitHubPluginUpdater(self)
-        self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
-        self.logger.debug(u"updateFrequency = " + str(self.updateFrequency))
-        self.next_update_check = time.time()
-
         self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
         self.logger.debug(u"pollFrequency = " + str(self.pollFrequency))
         self.next_poll = time.time()
@@ -68,10 +61,6 @@ class Plugin(indigo.PluginBase):
 
         try:
             while True:
-
-                if (self.updateFrequency > 0.0) and (time.time() > self.next_update_check):
-                    self.next_update_check = time.time() + self.updateFrequency
-                    self.updater.checkForUpdate()
 
                 if self.twilioClient:
                     if (self.pollFrequency > 0.0) and (time.time() > self.next_poll):
@@ -410,15 +399,6 @@ class Plugin(indigo.PluginBase):
         for dev in indigo.devices.iter("self"):
             if (dev.deviceTypeId == "twilioNumber"):
                 self.checkMessages(dev)
-
-    def checkForUpdates(self):
-        self.updater.checkForUpdate()
-
-    def updatePlugin(self):
-        self.updater.update()
-
-    def forceUpdate(self):
-        self.updater.update(currentVersion='0.0.0')
 
 
     def pickTwilioNumber(self, filter=None, valuesDict=None, typeId=0, targetId=0):
