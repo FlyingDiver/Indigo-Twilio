@@ -8,11 +8,13 @@ from datetime import datetime
 import pytz
 import urllib
 import logging
+import random
+import string
 
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
 
-kCurDevVersCount = 0        # current version of plugin devices
+kCurDevVersCount = 1        # current version of plugin devices
 
 kAnyDevice      = "ANYDEVICE"
 kOtherContact   = "OTHER-NON-CONTACT"
@@ -199,10 +201,15 @@ class Plugin(indigo.PluginBase):
 
         elif instanceVers < kCurDevVersCount:
             newProps = device.pluginProps
+            newProps["devVersCount"] = kCurDevVersCount
+            device.replacePluginPropsOnServer(newProps)
+            self.logger.debug(u"deviceStartComm: Updated " + device.name + " to version " + str(kCurDevVersCount))
 
         else:
             self.logger.warning(u"Unknown device version: " + str(instanceVers) + " for device " + device.name)
 
+        device.stateListOrDisplayStateIdChanged()
+ 
 
     ########################################
     # Terminate communication with servers
@@ -337,6 +344,30 @@ class Plugin(indigo.PluginBase):
         except TwilioException as e:
             self.logger.exception(u"voiceMessage twilioClient.calls.create error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+            callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+
+    ########################################
+
+    def doFlowAction(self, pluginAction):
+        callDevice = indigo.devices[pluginAction.deviceId]
+        callTo = pluginAction.props["callTo"]
+        flowSID = pluginAction.props["flowSID"]
+        self.doFlow(callDevice, callTo, flowSID)
+
+    def doFlow(self, callDevice, callTo, flowSID):
+        callNumber = callDevice.pluginProps['twilioNumber']
+        callURL = "https://studio.twilio.com/v1/Flows/{}/Engagements".format(flowSID)
+        auth = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+
+        try:
+            self.logger.debug(u"doFlow call to {} using {} with {}".format(callTo, callDevice.name, flowSID))
+            self.twilioClient.studio.flows(flowSID).engagements.create(to=callTo, from_=callNumber, parameters = '{"auth":"' + auth + '"}')
+            callDevice.updateStateOnServer(key="last_auth", value=auth)
+            callDevice.updateStateOnServer(key="numberStatus", value="Flow Activated")
+            callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+        except TwilioException as e:
+            self.logger.exception(u"doFlow twilioClient.studio.flows error: %s" % e)
+            callDevice.updateStateOnServer(key="numberStatus", value="Flow Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
     ########################################

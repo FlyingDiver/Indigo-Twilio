@@ -77,6 +77,18 @@
 			</Field>
 		</ConfigUI>
 	</Action>
+	<Action id="doFlowAction" deviceFilter="self.twilioNumber">
+		<Name>Place Flow Request</Name>
+		<CallbackMethod>doFlowAction</CallbackMethod>
+		<ConfigUI>
+			<Field id="callTo" type="textfield">
+				<Label>Call To:</Label>
+			</Field>
+			<Field id="flowSID" type="textfield">
+				<Label>Flow SID:</Label>
+			</Field>
+		</ConfigUI>
+	</Action>
 	<Action id="checkMessages" deviceFilter="self.twilioNumber">
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>

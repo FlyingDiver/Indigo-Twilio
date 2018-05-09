@@ -38,6 +38,11 @@
 				<TriggerLabel>Status</TriggerLabel>
 				<ControlPageLabel>Status</ControlPageLabel>
 			</State>
+			<State id="last_auth">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Last Auth Code</TriggerLabel>
+				<ControlPageLabel>Last Auth Code</ControlPageLabel>
+			</State>
 		</States>
     <UiDisplayStateId>numberStatus</UiDisplayStateId>
 	</Device>
