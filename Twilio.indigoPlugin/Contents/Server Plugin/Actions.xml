@@ -48,8 +48,12 @@
 		<Name>Place a Call</Name>
 		<CallbackMethod>voiceCallAction</CallbackMethod>
 		<ConfigUI>
-			<Field id="callTo" type="textfield">
-				<Label>Call To:</Label>
+        	<Field id="twilioContact" type="menu">
+            	<Label>Twilio Contact:</Label>
+            	<List class="self" filter="" method="pickTwilioContact" dynamicReload="true"/>
+			</Field>			
+			<Field id="callTo" type="textfield" visibleBindingId="twilioContact" visibleBindingValue="OTHER-NON-CONTACT" >
+				<Label>To:</Label>
 			</Field>
 			<Field id="bucket" type="menu" defaultValue="com.twilio.music.ambient">
 				<Label>Hold Music Style:</Label>
@@ -69,8 +73,12 @@
 		<Name>Place a Message Call</Name>
 		<CallbackMethod>voiceMessageAction</CallbackMethod>
 		<ConfigUI>
-			<Field id="callTo" type="textfield">
-				<Label>Call To:</Label>
+        	<Field id="twilioContact" type="menu">
+            	<Label>Twilio Contact:</Label>
+            	<List class="self" filter="" method="pickTwilioContact" dynamicReload="true"/>
+			</Field>			
+			<Field id="callTo" type="textfield" visibleBindingId="twilioContact" visibleBindingValue="OTHER-NON-CONTACT" >
+				<Label>To:</Label>
 			</Field>
 			<Field id="messageText" type="textfield">
 				<Label>Message:</Label>
@@ -81,11 +89,18 @@
 		<Name>Place Flow Request</Name>
 		<CallbackMethod>doFlowAction</CallbackMethod>
 		<ConfigUI>
-			<Field id="callTo" type="textfield">
-				<Label>Call To:</Label>
+        	<Field id="twilioContact" type="menu">
+            	<Label>Twilio Contact:</Label>
+            	<List class="self" filter="" method="pickTwilioContact" dynamicReload="true"/>
+			</Field>			
+			<Field id="callTo" type="textfield" visibleBindingId="twilioContact" visibleBindingValue="OTHER-NON-CONTACT" >
+				<Label>To:</Label>
 			</Field>
 			<Field id="flowSID" type="textfield">
 				<Label>Flow SID:</Label>
+			</Field>
+			<Field id="flowMessage" type="textfield">
+				<Label>Message to Speak:</Label>
 			</Field>
 		</ConfigUI>
 	</Action>

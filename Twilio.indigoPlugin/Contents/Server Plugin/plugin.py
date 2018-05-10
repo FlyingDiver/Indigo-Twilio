@@ -10,6 +10,7 @@ import urllib
 import logging
 import random
 import string
+import json
 
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
@@ -243,8 +244,7 @@ class Plugin(indigo.PluginBase):
     def sendSMSAction(self, pluginAction):
         smsDevice = indigo.devices[pluginAction.deviceId]
         smsMessage = pluginAction.props["smsMessage"]
-        contact = pluginAction.props.get("twilioContact", kOtherContact)
-        if contact == kOtherContact:
+        if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
             smsTo = pluginAction.props["smsTo"]
         else:
             contactID = int(pluginAction.props["twilioContact"])
@@ -276,7 +276,7 @@ class Plugin(indigo.PluginBase):
         mmsDevice = indigo.devices[pluginAction.deviceId]
         mmsMessage = pluginAction.props["mmsMessage"]
         mmsUrl = pluginAction.props["mmsUrl"]
-        if pluginAction.props["twilioContact"] == kOtherContact:
+        if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
             mmsTo = pluginAction.props["mmsTo"]
         else:
             contactID = int(pluginAction.props["twilioContact"])
@@ -310,6 +310,12 @@ class Plugin(indigo.PluginBase):
         callDevice = indigo.devices[pluginAction.deviceId]
         callTo = pluginAction.props["callTo"]
         bucket = pluginAction.props["bucket"]
+        if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
+            callTo = pluginAction.props["callTo"]
+        else:
+            contactID = int(pluginAction.props["twilioContact"])
+            contactDevice = indigo.devices[contactID]
+            callTo = contactDevice.pluginProps['contactNumber']
         self.voiceCall(callDevice, callTo, bucket)
 
     def voiceCall(self, callDevice, callTo, bucket):
@@ -329,8 +335,13 @@ class Plugin(indigo.PluginBase):
 
     def voiceMessageAction(self, pluginAction):
         callDevice = indigo.devices[pluginAction.deviceId]
-        callTo = pluginAction.props["callTo"]
         messageText = pluginAction.props["messageText"]
+        if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
+            callTo = pluginAction.props["callTo"]
+        else:
+            contactID = int(pluginAction.props["twilioContact"])
+            contactDevice = indigo.devices[contactID]
+            callTo = contactDevice.pluginProps['contactNumber']
         self.voiceMessage(callDevice, callTo, messageText)
 
     def voiceMessage(self, callDevice, callTo, messageText):
@@ -350,18 +361,27 @@ class Plugin(indigo.PluginBase):
 
     def doFlowAction(self, pluginAction):
         callDevice = indigo.devices[pluginAction.deviceId]
-        callTo = pluginAction.props["callTo"]
         flowSID = pluginAction.props["flowSID"]
-        self.doFlow(callDevice, callTo, flowSID)
+        flowMessage = pluginAction.props["flowMessage"]
+        if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
+            callTo = pluginAction.props["callTo"]
+        else:
+            contactID = int(pluginAction.props["twilioContact"])
+            contactDevice = indigo.devices[contactID]
+            callTo = contactDevice.pluginProps['contactNumber']
+        self.doFlow(callDevice, callTo, flowSID, flowMessage)
 
-    def doFlow(self, callDevice, callTo, flowSID):
+    def doFlow(self, callDevice, callTo, flowSID, flowMessage):
         callNumber = callDevice.pluginProps['twilioNumber']
         callURL = "https://studio.twilio.com/v1/Flows/{}/Engagements".format(flowSID)
         auth = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
-
+        params = {
+            "auth": auth, 
+            "message": flowMessage
+        }
         try:
             self.logger.debug(u"doFlow call to {} using {} with {}".format(callTo, callDevice.name, flowSID))
-            self.twilioClient.studio.flows(flowSID).engagements.create(to=callTo, from_=callNumber, parameters = '{"auth":"' + auth + '"}')
+            self.twilioClient.studio.flows(flowSID).engagements.create(to=callTo, from_=callNumber, parameters = json.dumps(params))
             callDevice.updateStateOnServer(key="last_auth", value=auth)
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Activated")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
