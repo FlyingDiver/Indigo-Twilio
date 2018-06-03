@@ -309,16 +309,18 @@ class Plugin(indigo.PluginBase):
     def voiceCallAction(self, pluginAction):
         callDevice = indigo.devices[pluginAction.deviceId]
         callTo = pluginAction.props["callTo"]
-        bucket = pluginAction.props["bucket"]
+        musicBucket = pluginAction.props["bucket"]
         if pluginAction.props.get("twilioContact", kOtherContact) == kOtherContact:
             callTo = pluginAction.props["callTo"]
         else:
             contactID = int(pluginAction.props["twilioContact"])
             contactDevice = indigo.devices[contactID]
             callTo = contactDevice.pluginProps['contactNumber']
-        self.voiceCall(callDevice, callTo, bucket)
+        self.voiceCall(callDevice, callTo, musicBucket)
 
-    def voiceCall(self, callDevice, callTo, bucket):
+    def voiceCall(self, callDevice, callTo, musicBucket):
+        bucket = indigo.activePlugin.substitute(musicBucket)
+        to = indigo.activePlugin.substitute(callTo)
         callNumber = callDevice.pluginProps['twilioNumber']
         callURL = "http://twimlets.com/holdmusic?Bucket=" + bucket
         try:
@@ -345,11 +347,13 @@ class Plugin(indigo.PluginBase):
         self.voiceMessage(callDevice, callTo, messageText)
 
     def voiceMessage(self, callDevice, callTo, messageText):
+        to = indigo.activePlugin.substitute(callTo)
+        message = indigo.activePlugin.substitute(messageText)
         callNumber = callDevice.pluginProps['twilioNumber']
-        callURL = "http://twimlets.com/message?" + urllib.quote("Message[0]=" + messageText,"=")
+        callURL = "http://twimlets.com/message?" + urllib.quote("Message[0]=" + message,"=")
         try:
-            self.logger.debug(u"voiceMessage call to " + callTo + " using " + callDevice.name + " with " + callURL)
-            self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
+            self.logger.debug(u"voiceMessage call to " + to + " using " + callDevice.name + " with " + callURL)
+            self.twilioClient.calls.create(to=to, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except TwilioException as e:
@@ -372,16 +376,18 @@ class Plugin(indigo.PluginBase):
         self.doFlow(callDevice, callTo, flowSID, flowMessage)
 
     def doFlow(self, callDevice, callTo, flowSID, flowMessage):
+        to = indigo.activePlugin.substitute(callTo)
+        message = indigo.activePlugin.substitute(flowMessage)
         callNumber = callDevice.pluginProps['twilioNumber']
         callURL = "https://studio.twilio.com/v1/Flows/{}/Engagements".format(flowSID)
         auth = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
         params = {
             "auth": auth, 
-            "message": flowMessage
+            "message": message
         }
         try:
-            self.logger.debug(u"doFlow call to {} using {} with {}".format(callTo, callDevice.name, flowSID))
-            self.twilioClient.studio.flows(flowSID).engagements.create(to=callTo, from_=callNumber, parameters = json.dumps(params))
+            self.logger.debug(u"doFlow call to {} using {} with {}".format(to, callDevice.name, flowSID))
+            self.twilioClient.studio.flows(flowSID).engagements.create(to=to, from_=callNumber, parameters = json.dumps(params))
             callDevice.updateStateOnServer(key="last_auth", value=auth)
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Activated")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
