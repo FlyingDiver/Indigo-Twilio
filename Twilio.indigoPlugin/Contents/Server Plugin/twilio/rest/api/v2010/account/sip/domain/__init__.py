@@ -12,6 +12,7 @@ from twilio.base.instance_context import InstanceContext
 from twilio.base.instance_resource import InstanceResource
 from twilio.base.list_resource import ListResource
 from twilio.base.page import Page
+from twilio.rest.api.v2010.account.sip.domain.auth_types import AuthTypesList
 from twilio.rest.api.v2010.account.sip.domain.credential_list_mapping import CredentialListMappingList
 from twilio.rest.api.v2010.account.sip.domain.ip_access_control_list_mapping import IpAccessControlListMappingList
 
@@ -134,7 +135,7 @@ class DomainList(ListResource):
         :param unicode voice_fallback_url: URL Twilio will request if an error occurs in executing TwiML
         :param unicode voice_fallback_method: HTTP method used with voice_fallback_url
         :param unicode voice_status_callback_url: URL that Twilio will request with status updates
-        :param unicode voice_status_callback_method: The voice_status_callback_method
+        :param unicode voice_status_callback_method: The HTTP method Twilio will use to make requests to the StatusCallback URL.
         :param bool sip_registration: The sip_registration
 
         :returns: Newly created DomainInstance
@@ -256,6 +257,7 @@ class DomainContext(InstanceContext):
         # Dependents
         self._ip_access_control_list_mappings = None
         self._credential_list_mappings = None
+        self._auth = None
 
     def fetch(self):
         """
@@ -366,6 +368,22 @@ class DomainContext(InstanceContext):
             )
         return self._credential_list_mappings
 
+    @property
+    def auth(self):
+        """
+        Access the auth
+
+        :returns: twilio.rest.api.v2010.account.sip.domain.auth_types.AuthTypesList
+        :rtype: twilio.rest.api.v2010.account.sip.domain.auth_types.AuthTypesList
+        """
+        if self._auth is None:
+            self._auth = AuthTypesList(
+                self._version,
+                account_sid=self._solution['account_sid'],
+                domain_sid=self._solution['sid'],
+            )
+        return self._auth
+
     def __repr__(self):
         """
         Provide a friendly representation
@@ -434,7 +452,7 @@ class DomainInstance(InstanceResource):
     @property
     def account_sid(self):
         """
-        :returns: The unique id of the account that sent the message
+        :returns: The unique id of the account that sent the call
         :rtype: unicode
         """
         return self._properties['account_sid']
@@ -442,7 +460,7 @@ class DomainInstance(InstanceResource):
     @property
     def api_version(self):
         """
-        :returns: The Twilio API version used to process the message
+        :returns: The Twilio API version used to process the call
         :rtype: unicode
         """
         return self._properties['api_version']
@@ -530,7 +548,7 @@ class DomainInstance(InstanceResource):
     @property
     def voice_status_callback_method(self):
         """
-        :returns: The voice_status_callback_method
+        :returns: The HTTP method Twilio will use to make requests to the StatusCallback URL.
         :rtype: unicode
         """
         return self._properties['voice_status_callback_method']
@@ -637,6 +655,16 @@ class DomainInstance(InstanceResource):
         :rtype: twilio.rest.api.v2010.account.sip.domain.credential_list_mapping.CredentialListMappingList
         """
         return self._proxy.credential_list_mappings
+
+    @property
+    def auth(self):
+        """
+        Access the auth
+
+        :returns: twilio.rest.api.v2010.account.sip.domain.auth_types.AuthTypesList
+        :rtype: twilio.rest.api.v2010.account.sip.domain.auth_types.AuthTypesList
+        """
+        return self._proxy.auth
 
     def __repr__(self):
         """

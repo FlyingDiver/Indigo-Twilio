@@ -54,7 +54,7 @@ class IncomingPhoneNumberList(ListResource):
         :param bool beta: Include new phone numbers
         :param unicode friendly_name: Filter by friendly name
         :param unicode phone_number: Filter by incoming phone number
-        :param unicode origin: The origin
+        :param unicode origin: Include phone numbers based on the origin, by default, phone numbers of all origin are included.
         :param int limit: Upper limit for the number of records to return. stream()
                           guarantees to never return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -88,7 +88,7 @@ class IncomingPhoneNumberList(ListResource):
         :param bool beta: Include new phone numbers
         :param unicode friendly_name: Filter by friendly name
         :param unicode phone_number: Filter by incoming phone number
-        :param unicode origin: The origin
+        :param unicode origin: Include phone numbers based on the origin, by default, phone numbers of all origin are included.
         :param int limit: Upper limit for the number of records to return. list() guarantees
                           never to return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -119,7 +119,7 @@ class IncomingPhoneNumberList(ListResource):
         :param bool beta: Include new phone numbers
         :param unicode friendly_name: Filter by friendly name
         :param unicode phone_number: Filter by incoming phone number
-        :param unicode origin: The origin
+        :param unicode origin: Include phone numbers based on the origin, by default, phone numbers of all origin are included.
         :param str page_token: PageToken provided by the API
         :param int page_number: Page Number, this value is simply for client state
         :param int page_size: Number of records to return, defaults to 50
@@ -173,8 +173,8 @@ class IncomingPhoneNumberList(ListResource):
                voice_method=values.unset, voice_url=values.unset,
                emergency_status=values.unset, emergency_address_sid=values.unset,
                trunk_sid=values.unset, identity_sid=values.unset,
-               address_sid=values.unset, phone_number=values.unset,
-               area_code=values.unset):
+               address_sid=values.unset, voice_receive_mode=values.unset,
+               phone_number=values.unset, area_code=values.unset):
         """
         Create a new IncomingPhoneNumberInstance
 
@@ -193,11 +193,12 @@ class IncomingPhoneNumberList(ListResource):
         :param unicode voice_fallback_url: URL Twilio will request when an error occurs in TwiML
         :param unicode voice_method: HTTP method used with the voice url
         :param unicode voice_url: URL Twilio will request when receiving a call
-        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: The emergency_status
-        :param unicode emergency_address_sid: The emergency_address_sid
+        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: Status determining whether the number is enabled for emergency calling
+        :param unicode emergency_address_sid: EmergencyAddress configuration to leverage emergency calling
         :param unicode trunk_sid: Unique string to identify the trunk
         :param unicode identity_sid: Unique string that identifies the identity associated with number
         :param unicode address_sid: Unique string that identifies the address associated with number
+        :param IncomingPhoneNumberInstance.VoiceReceiveMode voice_receive_mode: Incoming call type: `fax` or `voice`
         :param unicode phone_number: The phone number
         :param unicode area_code: The desired area code for the new number
 
@@ -227,6 +228,7 @@ class IncomingPhoneNumberList(ListResource):
             'TrunkSid': trunk_sid,
             'IdentitySid': identity_sid,
             'AddressSid': address_sid,
+            'VoiceReceiveMode': voice_receive_mode,
         })
 
         payload = self._version.create(
@@ -235,7 +237,11 @@ class IncomingPhoneNumberList(ListResource):
             data=data,
         )
 
-        return IncomingPhoneNumberInstance(self._version, payload, account_sid=self._solution['account_sid'], )
+        return IncomingPhoneNumberInstance(
+            self._version,
+            payload,
+            account_sid=self._solution['account_sid'],
+        )
 
     @property
     def local(self):
@@ -333,7 +339,11 @@ class IncomingPhoneNumberPage(Page):
         :returns: twilio.rest.api.v2010.account.incoming_phone_number.IncomingPhoneNumberInstance
         :rtype: twilio.rest.api.v2010.account.incoming_phone_number.IncomingPhoneNumberInstance
         """
-        return IncomingPhoneNumberInstance(self._version, payload, account_sid=self._solution['account_sid'], )
+        return IncomingPhoneNumberInstance(
+            self._version,
+            payload,
+            account_sid=self._solution['account_sid'],
+        )
 
     def __repr__(self):
         """
@@ -353,7 +363,7 @@ class IncomingPhoneNumberContext(InstanceContext):
         Initialize the IncomingPhoneNumberContext
 
         :param Version version: Version that contains the resource
-        :param account_sid: The account_sid
+        :param account_sid: The unique sid that identifies this account
         :param sid: Fetch by unique incoming-phone-number Sid
 
         :returns: twilio.rest.api.v2010.account.incoming_phone_number.IncomingPhoneNumberContext
@@ -399,10 +409,10 @@ class IncomingPhoneNumberContext(InstanceContext):
         :param unicode voice_fallback_url: URL Twilio will request when an error occurs in TwiML
         :param unicode voice_method: HTTP method used with the voice url
         :param unicode voice_url: URL Twilio will request when receiving a call
-        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: The emergency_status
-        :param unicode emergency_address_sid: The emergency_address_sid
+        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: Status determining whether the number is enabled for emergency calling
+        :param unicode emergency_address_sid: EmergencyAddress configuration to leverage emergency calling
         :param unicode trunk_sid: Unique string to identify the trunk
-        :param IncomingPhoneNumberInstance.VoiceReceiveMode voice_receive_mode: The voice_receive_mode
+        :param IncomingPhoneNumberInstance.VoiceReceiveMode voice_receive_mode: Incoming call type: `fax` or `voice`
         :param unicode identity_sid: Unique string that identifies the identity associated with number
         :param unicode address_sid: Unique string that identifies the address associated with number
 
@@ -677,7 +687,7 @@ class IncomingPhoneNumberInstance(InstanceResource):
     @property
     def origin(self):
         """
-        :returns: The origin
+        :returns: Twilio owned phone numbers are marked as twilio while hosted phone numbers are marked as hosted.
         :rtype: unicode
         """
         return self._properties['origin']
@@ -857,10 +867,10 @@ class IncomingPhoneNumberInstance(InstanceResource):
         :param unicode voice_fallback_url: URL Twilio will request when an error occurs in TwiML
         :param unicode voice_method: HTTP method used with the voice url
         :param unicode voice_url: URL Twilio will request when receiving a call
-        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: The emergency_status
-        :param unicode emergency_address_sid: The emergency_address_sid
+        :param IncomingPhoneNumberInstance.EmergencyStatus emergency_status: Status determining whether the number is enabled for emergency calling
+        :param unicode emergency_address_sid: EmergencyAddress configuration to leverage emergency calling
         :param unicode trunk_sid: Unique string to identify the trunk
-        :param IncomingPhoneNumberInstance.VoiceReceiveMode voice_receive_mode: The voice_receive_mode
+        :param IncomingPhoneNumberInstance.VoiceReceiveMode voice_receive_mode: Incoming call type: `fax` or `voice`
         :param unicode identity_sid: Unique string that identifies the identity associated with number
         :param unicode address_sid: Unique string that identifies the address associated with number
 

@@ -14,6 +14,7 @@ from twilio.base.instance_resource import InstanceResource
 from twilio.base.list_resource import ListResource
 from twilio.base.page import Page
 from twilio.rest.api.v2010.account.conference.participant import ParticipantList
+from twilio.rest.api.v2010.account.conference.recording import RecordingList
 
 
 class ConferenceList(ListResource):
@@ -279,6 +280,7 @@ class ConferenceContext(InstanceContext):
 
         # Dependents
         self._participants = None
+        self._recordings = None
 
     def fetch(self):
         """
@@ -307,9 +309,9 @@ class ConferenceContext(InstanceContext):
         """
         Update the ConferenceInstance
 
-        :param ConferenceInstance.UpdateStatus status: The status
-        :param unicode announce_url: The announce_url
-        :param unicode announce_method: The announce_method
+        :param ConferenceInstance.UpdateStatus status: Specifying completed will end the conference and kick all participants
+        :param unicode announce_url: The 'AnnounceUrl' attribute lets you specify a URL for announcing something into a conference.
+        :param unicode announce_method: Specify GET or POST, defaults to POST
 
         :returns: Updated ConferenceInstance
         :rtype: twilio.rest.api.v2010.account.conference.ConferenceInstance
@@ -344,6 +346,22 @@ class ConferenceContext(InstanceContext):
                 conference_sid=self._solution['sid'],
             )
         return self._participants
+
+    @property
+    def recordings(self):
+        """
+        Access the recordings
+
+        :returns: twilio.rest.api.v2010.account.conference.recording.RecordingList
+        :rtype: twilio.rest.api.v2010.account.conference.recording.RecordingList
+        """
+        if self._recordings is None:
+            self._recordings = RecordingList(
+                self._version,
+                account_sid=self._solution['account_sid'],
+                conference_sid=self._solution['sid'],
+            )
+        return self._recordings
 
     def __repr__(self):
         """
@@ -454,7 +472,7 @@ class ConferenceInstance(InstanceResource):
     @property
     def region(self):
         """
-        :returns: The region
+        :returns: A string representing the Twilio Region where the conference was mixed.
         :rtype: unicode
         """
         return self._properties['region']
@@ -505,9 +523,9 @@ class ConferenceInstance(InstanceResource):
         """
         Update the ConferenceInstance
 
-        :param ConferenceInstance.UpdateStatus status: The status
-        :param unicode announce_url: The announce_url
-        :param unicode announce_method: The announce_method
+        :param ConferenceInstance.UpdateStatus status: Specifying completed will end the conference and kick all participants
+        :param unicode announce_url: The 'AnnounceUrl' attribute lets you specify a URL for announcing something into a conference.
+        :param unicode announce_method: Specify GET or POST, defaults to POST
 
         :returns: Updated ConferenceInstance
         :rtype: twilio.rest.api.v2010.account.conference.ConferenceInstance
@@ -523,6 +541,16 @@ class ConferenceInstance(InstanceResource):
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantList
         """
         return self._proxy.participants
+
+    @property
+    def recordings(self):
+        """
+        Access the recordings
+
+        :returns: twilio.rest.api.v2010.account.conference.recording.RecordingList
+        :rtype: twilio.rest.api.v2010.account.conference.recording.RecordingList
+        """
+        return self._proxy.recordings
 
     def __repr__(self):
         """

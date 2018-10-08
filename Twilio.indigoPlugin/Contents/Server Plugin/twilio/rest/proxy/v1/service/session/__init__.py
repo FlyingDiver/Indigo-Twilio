@@ -45,7 +45,7 @@ class SessionList(ListResource):
         is reached.
         The results are returned as a generator, so this operation is memory efficient.
 
-        :param unicode unique_name: A unique, developer assigned name of this Session.
+        :param unicode unique_name: The unique_name
         :param SessionInstance.Status status: The Status of this Session
         :param int limit: Upper limit for the number of records to return. stream()
                           guarantees to never return more than limit.  Default is no limit
@@ -70,7 +70,7 @@ class SessionList(ListResource):
         Unlike stream(), this operation is eager and will load `limit` records into
         memory before returning.
 
-        :param unicode unique_name: A unique, developer assigned name of this Session.
+        :param unicode unique_name: The unique_name
         :param SessionInstance.Status status: The Status of this Session
         :param int limit: Upper limit for the number of records to return. list() guarantees
                           never to return more than limit.  Default is no limit
@@ -91,7 +91,7 @@ class SessionList(ListResource):
         Retrieve a single page of SessionInstance records from the API.
         Request is executed immediately
 
-        :param unicode unique_name: A unique, developer assigned name of this Session.
+        :param unicode unique_name: The unique_name
         :param SessionInstance.Status status: The Status of this Session
         :param str page_token: PageToken provided by the API
         :param int page_number: Page Number, this value is simply for client state
@@ -140,11 +140,11 @@ class SessionList(ListResource):
         Create a new SessionInstance
 
         :param unicode unique_name: A unique, developer assigned name of this Session.
-        :param datetime date_expiry: The date this Session was expiry
+        :param datetime date_expiry: The date this Session should expire
         :param unicode ttl: TTL for a Session, in seconds.
         :param SessionInstance.Mode mode: The Mode of this Session
-        :param SessionInstance.Status status: The Status of this Session
-        :param dict participants: A list of phone numbers to add to this Session.
+        :param SessionInstance.Status status: Session status
+        :param dict participants: The participants
 
         :returns: Newly created SessionInstance
         :rtype: twilio.rest.proxy.v1.service.session.SessionInstance
@@ -295,24 +295,21 @@ class SessionContext(InstanceContext):
         """
         return self._version.delete('delete', self._uri)
 
-    def update(self, unique_name=values.unset, date_expiry=values.unset,
-               ttl=values.unset, mode=values.unset, status=values.unset,
-               participants=values.unset):
+    def update(self, date_expiry=values.unset, ttl=values.unset, mode=values.unset,
+               status=values.unset, participants=values.unset):
         """
         Update the SessionInstance
 
-        :param unicode unique_name: A unique, developer assigned name of this Session.
-        :param datetime date_expiry: The date this Session was expiry
+        :param datetime date_expiry: The date this Session should expire
         :param unicode ttl: TTL for a Session, in seconds.
-        :param SessionInstance.Mode mode: The Mode of this Session
+        :param SessionInstance.Mode mode: The mode
         :param SessionInstance.Status status: The Status of this Session
-        :param dict participants: A list of phone numbers to add to this Session.
+        :param dict participants: The participants
 
         :returns: Updated SessionInstance
         :rtype: twilio.rest.proxy.v1.service.session.SessionInstance
         """
         data = values.of({
-            'UniqueName': unique_name,
             'DateExpiry': serialize.iso8601_datetime(date_expiry),
             'Ttl': ttl,
             'Mode': mode,
@@ -485,7 +482,7 @@ class SessionInstance(InstanceResource):
     @property
     def date_last_interaction(self):
         """
-        :returns: The date this Session was interaction
+        :returns: The date this Session last had an interaction
         :rtype: datetime
         """
         return self._properties['date_last_interaction']
@@ -493,7 +490,7 @@ class SessionInstance(InstanceResource):
     @property
     def date_expiry(self):
         """
-        :returns: The date this Session was expiry
+        :returns: The date this Session should expire
         :rtype: datetime
         """
         return self._properties['date_expiry']
@@ -501,7 +498,7 @@ class SessionInstance(InstanceResource):
     @property
     def unique_name(self):
         """
-        :returns: A unique, developer assigned name of this Session.
+        :returns: A unique, developer assigned identifier for this Session.
         :rtype: unicode
         """
         return self._properties['unique_name']
@@ -549,7 +546,7 @@ class SessionInstance(InstanceResource):
     @property
     def date_updated(self):
         """
-        :returns: The date this Session was updated
+        :returns: The date this Session was last updated
         :rtype: datetime
         """
         return self._properties['date_updated']
@@ -588,24 +585,21 @@ class SessionInstance(InstanceResource):
         """
         return self._proxy.delete()
 
-    def update(self, unique_name=values.unset, date_expiry=values.unset,
-               ttl=values.unset, mode=values.unset, status=values.unset,
-               participants=values.unset):
+    def update(self, date_expiry=values.unset, ttl=values.unset, mode=values.unset,
+               status=values.unset, participants=values.unset):
         """
         Update the SessionInstance
 
-        :param unicode unique_name: A unique, developer assigned name of this Session.
-        :param datetime date_expiry: The date this Session was expiry
+        :param datetime date_expiry: The date this Session should expire
         :param unicode ttl: TTL for a Session, in seconds.
-        :param SessionInstance.Mode mode: The Mode of this Session
+        :param SessionInstance.Mode mode: The mode
         :param SessionInstance.Status status: The Status of this Session
-        :param dict participants: A list of phone numbers to add to this Session.
+        :param dict participants: The participants
 
         :returns: Updated SessionInstance
         :rtype: twilio.rest.proxy.v1.service.session.SessionInstance
         """
         return self._proxy.update(
-            unique_name=unique_name,
             date_expiry=date_expiry,
             ttl=ttl,
             mode=mode,

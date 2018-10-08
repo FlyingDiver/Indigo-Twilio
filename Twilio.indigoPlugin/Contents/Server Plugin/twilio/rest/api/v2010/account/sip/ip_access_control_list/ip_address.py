@@ -22,7 +22,7 @@ class IpAddressList(ListResource):
         Initialize the IpAddressList
 
         :param Version version: Version that contains the resource
-        :param account_sid: The account_sid
+        :param account_sid: The unique id of the Account that responsible for this resource.
         :param ip_access_control_list_sid: The ip_access_control_list_sid
 
         :returns: twilio.rest.api.v2010.account.sip.ip_access_control_list.ip_address.IpAddressList
@@ -118,17 +118,22 @@ class IpAddressList(ListResource):
 
         return IpAddressPage(self._version, response, self._solution)
 
-    def create(self, friendly_name, ip_address):
+    def create(self, friendly_name, ip_address, cidr_prefix_length=values.unset):
         """
         Create a new IpAddressInstance
 
         :param unicode friendly_name: The friendly_name
         :param unicode ip_address: The ip_address
+        :param unicode cidr_prefix_length: The cidr_prefix_length
 
         :returns: Newly created IpAddressInstance
         :rtype: twilio.rest.api.v2010.account.sip.ip_access_control_list.ip_address.IpAddressInstance
         """
-        data = values.of({'FriendlyName': friendly_name, 'IpAddress': ip_address, })
+        data = values.of({
+            'FriendlyName': friendly_name,
+            'IpAddress': ip_address,
+            'CidrPrefixLength': cidr_prefix_length,
+        })
 
         payload = self._version.create(
             'POST',
@@ -194,7 +199,7 @@ class IpAddressPage(Page):
 
         :param Version version: Version that contains the resource
         :param Response response: Response from the API
-        :param account_sid: The account_sid
+        :param account_sid: The unique id of the Account that responsible for this resource.
         :param ip_access_control_list_sid: The ip_access_control_list_sid
 
         :returns: twilio.rest.api.v2010.account.sip.ip_access_control_list.ip_address.IpAddressPage
@@ -279,17 +284,23 @@ class IpAddressContext(InstanceContext):
             sid=self._solution['sid'],
         )
 
-    def update(self, ip_address=values.unset, friendly_name=values.unset):
+    def update(self, ip_address=values.unset, friendly_name=values.unset,
+               cidr_prefix_length=values.unset):
         """
         Update the IpAddressInstance
 
         :param unicode ip_address: The ip_address
         :param unicode friendly_name: The friendly_name
+        :param unicode cidr_prefix_length: The cidr_prefix_length
 
         :returns: Updated IpAddressInstance
         :rtype: twilio.rest.api.v2010.account.sip.ip_access_control_list.ip_address.IpAddressInstance
         """
-        data = values.of({'IpAddress': ip_address, 'FriendlyName': friendly_name, })
+        data = values.of({
+            'IpAddress': ip_address,
+            'FriendlyName': friendly_name,
+            'CidrPrefixLength': cidr_prefix_length,
+        })
 
         payload = self._version.update(
             'POST',
@@ -344,6 +355,7 @@ class IpAddressInstance(InstanceResource):
             'account_sid': payload['account_sid'],
             'friendly_name': payload['friendly_name'],
             'ip_address': payload['ip_address'],
+            'cidr_prefix_length': deserialize.integer(payload['cidr_prefix_length']),
             'ip_access_control_list_sid': payload['ip_access_control_list_sid'],
             'date_created': deserialize.rfc2822_datetime(payload['date_created']),
             'date_updated': deserialize.rfc2822_datetime(payload['date_updated']),
@@ -379,7 +391,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def sid(self):
         """
-        :returns: The sid
+        :returns: A 34 character string that uniquely identifies this resource.
         :rtype: unicode
         """
         return self._properties['sid']
@@ -387,7 +399,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def account_sid(self):
         """
-        :returns: The account_sid
+        :returns: The unique id of the Account that responsible for this resource.
         :rtype: unicode
         """
         return self._properties['account_sid']
@@ -395,7 +407,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def friendly_name(self):
         """
-        :returns: The friendly_name
+        :returns: A human readable descriptive text for this resource, up to 64 characters long.
         :rtype: unicode
         """
         return self._properties['friendly_name']
@@ -403,10 +415,18 @@ class IpAddressInstance(InstanceResource):
     @property
     def ip_address(self):
         """
-        :returns: The ip_address
+        :returns: An IP address in dotted decimal notation from which you want to accept traffic. Any SIP requests from this IP address will be allowed by Twilio. IPv4 only supported today.
         :rtype: unicode
         """
         return self._properties['ip_address']
+
+    @property
+    def cidr_prefix_length(self):
+        """
+        :returns: An integer representing the length of the CIDR prefix to use with this IP address when accepting traffic. By default the entire IP address is used.
+        :rtype: unicode
+        """
+        return self._properties['cidr_prefix_length']
 
     @property
     def ip_access_control_list_sid(self):
@@ -419,7 +439,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def date_created(self):
         """
-        :returns: The date_created
+        :returns: The date that this resource was created, given as GMT in RFC 2822 format.
         :rtype: datetime
         """
         return self._properties['date_created']
@@ -427,7 +447,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def date_updated(self):
         """
-        :returns: The date_updated
+        :returns: The date that this resource was last updated, given as GMT in RFC 2822 format.
         :rtype: datetime
         """
         return self._properties['date_updated']
@@ -435,7 +455,7 @@ class IpAddressInstance(InstanceResource):
     @property
     def uri(self):
         """
-        :returns: The uri
+        :returns: The URI for this resource, relative to https://api.twilio.com
         :rtype: unicode
         """
         return self._properties['uri']
@@ -449,17 +469,23 @@ class IpAddressInstance(InstanceResource):
         """
         return self._proxy.fetch()
 
-    def update(self, ip_address=values.unset, friendly_name=values.unset):
+    def update(self, ip_address=values.unset, friendly_name=values.unset,
+               cidr_prefix_length=values.unset):
         """
         Update the IpAddressInstance
 
         :param unicode ip_address: The ip_address
         :param unicode friendly_name: The friendly_name
+        :param unicode cidr_prefix_length: The cidr_prefix_length
 
         :returns: Updated IpAddressInstance
         :rtype: twilio.rest.api.v2010.account.sip.ip_access_control_list.ip_address.IpAddressInstance
         """
-        return self._proxy.update(ip_address=ip_address, friendly_name=friendly_name, )
+        return self._proxy.update(
+            ip_address=ip_address,
+            friendly_name=friendly_name,
+            cidr_prefix_length=cidr_prefix_length,
+        )
 
     def delete(self):
         """

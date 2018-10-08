@@ -25,7 +25,7 @@ class RecordingList(ListResource):
         Initialize the RecordingList
 
         :param Version version: Version that contains the resource
-        :param account_sid: The unique sid that identifies this account
+        :param account_sid: The unique SID that identifies this account
 
         :returns: twilio.rest.api.v2010.account.recording.RecordingList
         :rtype: twilio.rest.api.v2010.account.recording.RecordingList
@@ -166,7 +166,7 @@ class RecordingList(ListResource):
         """
         Constructs a RecordingContext
 
-        :param sid: Fetch by unique recording Sid
+        :param sid: Fetch by unique recording SID
 
         :returns: twilio.rest.api.v2010.account.recording.RecordingContext
         :rtype: twilio.rest.api.v2010.account.recording.RecordingContext
@@ -177,7 +177,7 @@ class RecordingList(ListResource):
         """
         Constructs a RecordingContext
 
-        :param sid: Fetch by unique recording Sid
+        :param sid: Fetch by unique recording SID
 
         :returns: twilio.rest.api.v2010.account.recording.RecordingContext
         :rtype: twilio.rest.api.v2010.account.recording.RecordingContext
@@ -203,7 +203,7 @@ class RecordingPage(Page):
 
         :param Version version: Version that contains the resource
         :param Response response: Response from the API
-        :param account_sid: The unique sid that identifies this account
+        :param account_sid: The unique SID that identifies this account
 
         :returns: twilio.rest.api.v2010.account.recording.RecordingPage
         :rtype: twilio.rest.api.v2010.account.recording.RecordingPage
@@ -243,7 +243,7 @@ class RecordingContext(InstanceContext):
 
         :param Version version: Version that contains the resource
         :param account_sid: The account_sid
-        :param sid: Fetch by unique recording Sid
+        :param sid: Fetch by unique recording SID
 
         :returns: twilio.rest.api.v2010.account.recording.RecordingContext
         :rtype: twilio.rest.api.v2010.account.recording.RecordingContext
@@ -369,6 +369,7 @@ class RecordingInstance(InstanceResource):
             'conference_sid': payload['conference_sid'],
             'date_created': deserialize.rfc2822_datetime(payload['date_created']),
             'date_updated': deserialize.rfc2822_datetime(payload['date_updated']),
+            'start_time': deserialize.rfc2822_datetime(payload['start_time']),
             'duration': payload['duration'],
             'sid': payload['sid'],
             'price': payload['price'],
@@ -406,7 +407,7 @@ class RecordingInstance(InstanceResource):
     @property
     def account_sid(self):
         """
-        :returns: The unique sid that identifies this account
+        :returns: The unique SID that identifies this account
         :rtype: unicode
         """
         return self._properties['account_sid']
@@ -422,7 +423,7 @@ class RecordingInstance(InstanceResource):
     @property
     def call_sid(self):
         """
-        :returns: The unique id for the call leg that corresponds to the recording.
+        :returns: The unique ID for the call leg that corresponds to the recording.
         :rtype: unicode
         """
         return self._properties['call_sid']
@@ -430,7 +431,7 @@ class RecordingInstance(InstanceResource):
     @property
     def conference_sid(self):
         """
-        :returns: The unique id for the conference associated with the recording, if a conference recording.
+        :returns: The unique ID for the conference associated with the recording.
         :rtype: unicode
         """
         return self._properties['conference_sid']
@@ -452,9 +453,17 @@ class RecordingInstance(InstanceResource):
         return self._properties['date_updated']
 
     @property
+    def start_time(self):
+        """
+        :returns: The start time of the recording, in RFC 2822 format.
+        :rtype: datetime
+        """
+        return self._properties['start_time']
+
+    @property
     def duration(self):
         """
-        :returns: The length of the recording, in seconds.
+        :returns: The length of the recording in seconds.
         :rtype: unicode
         """
         return self._properties['duration']
@@ -526,7 +535,7 @@ class RecordingInstance(InstanceResource):
     @property
     def encryption_details(self):
         """
-        :returns: The encryption_details
+        :returns: Details for how to decrypt the recording.
         :rtype: dict
         """
         return self._properties['encryption_details']

@@ -52,7 +52,8 @@ class RecordList(ListResource):
         self._yesterday = None
 
     def stream(self, category=values.unset, start_date=values.unset,
-               end_date=values.unset, limit=None, page_size=None):
+               end_date=values.unset, include_subaccounts=values.unset, limit=None,
+               page_size=None):
         """
         Streams RecordInstance records from the API as a generator stream.
         This operation lazily loads records as efficiently as possible until the limit
@@ -62,6 +63,7 @@ class RecordList(ListResource):
         :param RecordInstance.Category category: Only include usage of a given category
         :param date start_date: Filter by start date
         :param date end_date: Filter by end date
+        :param bool include_subaccounts: Include usage from the master account and all subaccounts
         :param int limit: Upper limit for the number of records to return. stream()
                           guarantees to never return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -78,13 +80,15 @@ class RecordList(ListResource):
             category=category,
             start_date=start_date,
             end_date=end_date,
+            include_subaccounts=include_subaccounts,
             page_size=limits['page_size'],
         )
 
         return self._version.stream(page, limits['limit'], limits['page_limit'])
 
     def list(self, category=values.unset, start_date=values.unset,
-             end_date=values.unset, limit=None, page_size=None):
+             end_date=values.unset, include_subaccounts=values.unset, limit=None,
+             page_size=None):
         """
         Lists RecordInstance records from the API as a list.
         Unlike stream(), this operation is eager and will load `limit` records into
@@ -93,6 +97,7 @@ class RecordList(ListResource):
         :param RecordInstance.Category category: Only include usage of a given category
         :param date start_date: Filter by start date
         :param date end_date: Filter by end date
+        :param bool include_subaccounts: Include usage from the master account and all subaccounts
         :param int limit: Upper limit for the number of records to return. list() guarantees
                           never to return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -107,13 +112,15 @@ class RecordList(ListResource):
             category=category,
             start_date=start_date,
             end_date=end_date,
+            include_subaccounts=include_subaccounts,
             limit=limit,
             page_size=page_size,
         ))
 
     def page(self, category=values.unset, start_date=values.unset,
-             end_date=values.unset, page_token=values.unset,
-             page_number=values.unset, page_size=values.unset):
+             end_date=values.unset, include_subaccounts=values.unset,
+             page_token=values.unset, page_number=values.unset,
+             page_size=values.unset):
         """
         Retrieve a single page of RecordInstance records from the API.
         Request is executed immediately
@@ -121,6 +128,7 @@ class RecordList(ListResource):
         :param RecordInstance.Category category: Only include usage of a given category
         :param date start_date: Filter by start date
         :param date end_date: Filter by end date
+        :param bool include_subaccounts: Include usage from the master account and all subaccounts
         :param str page_token: PageToken provided by the API
         :param int page_number: Page Number, this value is simply for client state
         :param int page_size: Number of records to return, defaults to 50
@@ -132,6 +140,7 @@ class RecordList(ListResource):
             'Category': category,
             'StartDate': serialize.iso8601_date(start_date),
             'EndDate': serialize.iso8601_date(end_date),
+            'IncludeSubaccounts': include_subaccounts,
             'PageToken': page_token,
             'Page': page_number,
             'PageSize': page_size,
@@ -342,6 +351,7 @@ class RecordInstance(InstanceResource):
         CONVERSATIONS_PARTICIPANT_EVENTS = "conversations-participant-events"
         CONVERSATIONS_PARTICIPANTS = "conversations-participants"
         CPS = "cps"
+        FRAUD_LOOKUPS = "fraud-lookups"
         GROUP_ROOMS = "group-rooms"
         GROUP_ROOMS_DATA_TRACK = "group-rooms-data-track"
         GROUP_ROOMS_ENCRYPTED_MEDIA_RECORDED = "group-rooms-encrypted-media-recorded"
@@ -434,7 +444,13 @@ class RecordInstance(InstanceResource):
         PHONENUMBERS_TOLLFREE = "phonenumbers-tollfree"
         PREMIUMSUPPORT = "premiumsupport"
         PROXY = "proxy"
+        PROXY_ACTIVE_SESSIONS = "proxy-active-sessions"
         PV = "pv"
+        PV_COMPOSITION_MEDIA_DOWNLOADED = "pv-composition-media-downloaded"
+        PV_COMPOSITION_MEDIA_ENCRYPTED = "pv-composition-media-encrypted"
+        PV_COMPOSITION_MEDIA_STORED = "pv-composition-media-stored"
+        PV_COMPOSITION_MINUTES = "pv-composition-minutes"
+        PV_RECORDING_COMPOSITIONS = "pv-recording-compositions"
         PV_ROOM_PARTICIPANTS = "pv-room-participants"
         PV_ROOM_PARTICIPANTS_AU1 = "pv-room-participants-au1"
         PV_ROOM_PARTICIPANTS_BR1 = "pv-room-participants-br1"
@@ -497,8 +513,10 @@ class RecordInstance(InstanceResource):
         TWILIO_INTERCONNECT = "twilio-interconnect"
         VIDEO_RECORDINGS = "video-recordings"
         VOICE_INSIGHTS = "voice-insights"
-        VOICE_INSIGHTS_AUDIO_TRACE = "voice-insights-audio-trace"
-        VOICE_INSIGHTS_CARRIER_CALLS = "voice-insights-carrier-calls"
+        VOICE_INSIGHTS_CLIENT_INSIGHTS_ON_DEMAND_MINUTE = "voice-insights-client-insights-on-demand-minute"
+        VOICE_INSIGHTS_PTSN_INSIGHTS_ON_DEMAND_MINUTE = "voice-insights-ptsn-insights-on-demand-minute"
+        VOICE_INSIGHTS_SIP_INTERFACE_INSIGHTS_ON_DEMAND_MINUTE = "voice-insights-sip-interface-insights-on-demand-minute"
+        VOICE_INSIGHTS_SIP_TRUNKING_INSIGHTS_ON_DEMAND_MINUTE = "voice-insights-sip-trunking-insights-on-demand-minute"
         WIRELESS = "wireless"
         WIRELESS_ORDERS = "wireless-orders"
         WIRELESS_ORDERS_ARTWORK = "wireless-orders-artwork"

@@ -59,36 +59,36 @@ class ParticipantList(ListResource):
         """
         Create a new ParticipantInstance
 
-        :param unicode from_: The from
-        :param unicode to: The to
-        :param unicode status_callback: The status_callback
-        :param unicode status_callback_method: The status_callback_method
-        :param unicode status_callback_event: The status_callback_event
-        :param unicode timeout: The timeout
-        :param bool record: The record
-        :param bool muted: The muted
-        :param unicode beep: The beep
-        :param bool start_conference_on_enter: The start_conference_on_enter
-        :param bool end_conference_on_exit: The end_conference_on_exit
-        :param unicode wait_url: The wait_url
-        :param unicode wait_method: The wait_method
-        :param bool early_media: The early_media
-        :param unicode max_participants: The max_participants
-        :param unicode conference_record: The conference_record
-        :param unicode conference_trim: The conference_trim
-        :param unicode conference_status_callback: The conference_status_callback
-        :param unicode conference_status_callback_method: The conference_status_callback_method
-        :param unicode conference_status_callback_event: The conference_status_callback_event
-        :param unicode recording_channels: The recording_channels
-        :param unicode recording_status_callback: The recording_status_callback
-        :param unicode recording_status_callback_method: The recording_status_callback_method
-        :param unicode sip_auth_username: The sip_auth_username
-        :param unicode sip_auth_password: The sip_auth_password
-        :param unicode region: The region
-        :param unicode conference_recording_status_callback: The conference_recording_status_callback
-        :param unicode conference_recording_status_callback_method: The conference_recording_status_callback_method
-        :param unicode recording_status_callback_event: The recording_status_callback_event
-        :param unicode conference_recording_status_callback_event: The conference_recording_status_callback_event
+        :param unicode from_: The `from` phone number used to invite a participant.
+        :param unicode to: The number, client id, or sip address of the new participant.
+        :param unicode status_callback: URL for conference event callback.
+        :param unicode status_callback_method: Method Twilio should use to reach the status callback URL.
+        :param unicode status_callback_event: Set state change events that will trigger a callback.
+        :param unicode timeout: Number of seconds Twilio will wait for an answer.
+        :param bool record: Record the agent and their conferences.
+        :param bool muted: Mute the agent.
+        :param unicode beep: Play a beep when the participant joins the conference.
+        :param bool start_conference_on_enter: Begin the conference when the participant joins.
+        :param bool end_conference_on_exit: End the conference when the participant leaves.
+        :param unicode wait_url: URL that hosts pre-conference hold music
+        :param unicode wait_method: The method Twilio should use to request `WaitUrl`.
+        :param bool early_media: Agents can hear the state of the outbound call.
+        :param unicode max_participants: Maximum number of agent conference participants.
+        :param unicode conference_record: Record the conference.
+        :param unicode conference_trim: Trim silence from audio files.
+        :param unicode conference_status_callback: Callback URL for conference events.
+        :param unicode conference_status_callback_method: HTTP method for requesting `ConferenceStatusCallback` URL.
+        :param unicode conference_status_callback_event: Set which conference state changes should webhook to the `ConferenceStatusCallback`
+        :param unicode recording_channels: Specify `mono` or `dual` recording channels.
+        :param unicode recording_status_callback: The absolute URL for Twilio's webhook with recording status information.
+        :param unicode recording_status_callback_method: HTTP method for `RecordingStatusCallback`
+        :param unicode sip_auth_username: SIP username used for authenticating.
+        :param unicode sip_auth_password: SIP password for authentication.
+        :param unicode region: The region where Twilio should mix the conference audio.
+        :param unicode conference_recording_status_callback: Conference recording callback URL.
+        :param unicode conference_recording_status_callback_method: Method Twilio should use to request the `ConferenceRecordingStatusCallback` URL.
+        :param unicode recording_status_callback_event: Set which recording state changes should webhook to the `RecordingStatusCallback`
+        :param unicode conference_recording_status_callback_event: Set which conference recording state changes should webhook to the `ConferenceRecordingStatusCallback`
 
         :returns: Newly created ParticipantInstance
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantInstance
@@ -148,7 +148,7 @@ class ParticipantList(ListResource):
         The results are returned as a generator, so this operation is memory efficient.
 
         :param bool muted: Filter by muted participants
-        :param bool hold: The hold
+        :param bool hold: Only show participants that are held or unheld.
         :param int limit: Upper limit for the number of records to return. stream()
                           guarantees to never return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -173,7 +173,7 @@ class ParticipantList(ListResource):
         memory before returning.
 
         :param bool muted: Filter by muted participants
-        :param bool hold: The hold
+        :param bool hold: Only show participants that are held or unheld.
         :param int limit: Upper limit for the number of records to return. list() guarantees
                           never to return more than limit.  Default is no limit
         :param int page_size: Number of records to fetch per request, when not set will use
@@ -193,7 +193,7 @@ class ParticipantList(ListResource):
         Request is executed immediately
 
         :param bool muted: Filter by muted participants
-        :param bool hold: The hold
+        :param bool hold: Only show participants that are held or unheld.
         :param str page_token: PageToken provided by the API
         :param int page_number: Page Number, this value is simply for client state
         :param int page_size: Number of records to return, defaults to 50
@@ -238,7 +238,7 @@ class ParticipantList(ListResource):
         """
         Constructs a ParticipantContext
 
-        :param call_sid: The call_sid
+        :param call_sid: Fetch by unique participant Call SID
 
         :returns: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
@@ -254,7 +254,7 @@ class ParticipantList(ListResource):
         """
         Constructs a ParticipantContext
 
-        :param call_sid: The call_sid
+        :param call_sid: Fetch by unique participant Call SID
 
         :returns: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
@@ -330,9 +330,9 @@ class ParticipantContext(InstanceContext):
         Initialize the ParticipantContext
 
         :param Version version: Version that contains the resource
-        :param account_sid: The account_sid
+        :param account_sid: The unique sid that identifies this account
         :param conference_sid: The string that uniquely identifies this conference
-        :param call_sid: The call_sid
+        :param call_sid: Fetch by unique participant Call SID
 
         :returns: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantContext
@@ -340,7 +340,11 @@ class ParticipantContext(InstanceContext):
         super(ParticipantContext, self).__init__(version)
 
         # Path Solution
-        self._solution = {'account_sid': account_sid, 'conference_sid': conference_sid, 'call_sid': call_sid, }
+        self._solution = {
+            'account_sid': account_sid,
+            'conference_sid': conference_sid,
+            'call_sid': call_sid,
+        }
         self._uri = '/Accounts/{account_sid}/Conferences/{conference_sid}/Participants/{call_sid}.json'.format(**self._solution)
 
     def fetch(self):
@@ -373,11 +377,11 @@ class ParticipantContext(InstanceContext):
         Update the ParticipantInstance
 
         :param bool muted: Indicates if the participant should be muted
-        :param bool hold: The hold
-        :param unicode hold_url: The hold_url
-        :param unicode hold_method: The hold_method
-        :param unicode announce_url: The announce_url
-        :param unicode announce_method: The announce_method
+        :param bool hold: Specifying true will hold the participant, while false will un-hold.
+        :param unicode hold_url: The 'HoldUrl' attribute lets you specify a URL for music that plays when a participant is held.
+        :param unicode hold_method: Specify GET or POST, defaults to GET
+        :param unicode announce_url: The 'AnnounceUrl' attribute lets you specify a URL for announcing something to the participant.
+        :param unicode announce_method: Specify GET or POST, defaults to POST
 
         :returns: Updated ParticipantInstance
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantInstance
@@ -546,7 +550,7 @@ class ParticipantInstance(InstanceResource):
     @property
     def hold(self):
         """
-        :returns: The hold
+        :returns: true if this participant is currently held.
         :rtype: bool
         """
         return self._properties['hold']
@@ -591,11 +595,11 @@ class ParticipantInstance(InstanceResource):
         Update the ParticipantInstance
 
         :param bool muted: Indicates if the participant should be muted
-        :param bool hold: The hold
-        :param unicode hold_url: The hold_url
-        :param unicode hold_method: The hold_method
-        :param unicode announce_url: The announce_url
-        :param unicode announce_method: The announce_method
+        :param bool hold: Specifying true will hold the participant, while false will un-hold.
+        :param unicode hold_url: The 'HoldUrl' attribute lets you specify a URL for music that plays when a participant is held.
+        :param unicode hold_method: Specify GET or POST, defaults to GET
+        :param unicode announce_url: The 'AnnounceUrl' attribute lets you specify a URL for announcing something to the participant.
+        :param unicode announce_method: Specify GET or POST, defaults to POST
 
         :returns: Updated ParticipantInstance
         :rtype: twilio.rest.api.v2010.account.conference.participant.ParticipantInstance
