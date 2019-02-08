@@ -58,8 +58,13 @@ class Plugin(indigo.PluginBase):
                 self.logger.warning(u"Twilio API Check failed.  Twilio will stop working when the next API version is implemented.")
         else:
             self.logger.warning(u"accountSID and/or authToken not set")
+            self.twilioClient = None
+            
+        number_list = self.twilioClient.incoming_phone_numbers.list()
+        for number in number_list:
+            self.logger.debug(u"Twilio SID = {}, number = {}, sms webhook = {}".format(number.sid, number.phone_number, number.sms_url))
 
-        indigo.server.subscribeToBroadcast("com.flyingdiver.indigoplugin.httpd", u"httpd_post_broadcast", "checkMessagesHook")
+        indigo.server.subscribeToBroadcast("com.flyingdiver.indigoplugin.httpd", u"httpd_webhook", "checkMessagesHook")
 
 
     def shutdown(self):
@@ -152,10 +157,6 @@ class Plugin(indigo.PluginBase):
         self.logger.debug(u"validatePrefsConfigUi called")
         errorDict = indigo.Dict()
 
-        updateFrequency = int(valuesDict['updateFrequency'])
-        if (updateFrequency < 0) or (updateFrequency > 24):
-            errorDict['updateFrequency'] = u"Update frequency is invalid - enter a valid number (between 0 and 24)"
-
         accountSID = valuesDict['accountSID']
         if len(accountSID) < 30:
             errorDict['accountSID'] = u"Enter Account SID from Twilio Console Dashboard"
@@ -188,10 +189,6 @@ class Plugin(indigo.PluginBase):
             self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
             self.logger.debug(u"pollFrequency = " + str(self.pollFrequency))
             self.next_poll = time.time()
-
-            self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
-            self.logger.debug(u"updateFrequency = " + str(self.updateFrequency))
-            self.next_update_check = time.time()
 
 
     ########################################
@@ -406,10 +403,8 @@ class Plugin(indigo.PluginBase):
 
     def checkMessagesHook(self, hookData):
         self.logger.debug(u"checkMessagesHook: hookData: {}".format(hookData))
-        if hookData["name"] == u"twilioCheck":
+        if hookData.get("name") == u"twilioCheck":
             self.checkAllMessages()
-    
-    
 
     def checkMessagesAction(self, pluginAction, twilioDevice):
         self.checkMessages(twilioDevice)
@@ -453,6 +448,23 @@ class Plugin(indigo.PluginBase):
             twilioDevice.updateStateOnServer(key="numberStatus", value="Success")
             twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
             self.logger.debug(u"checkMessages: Done")
+
+    def updateWebhook(self, pluginAction, twilioDevice):
+        number = twilioDevice.pluginProps['twilioNumber']
+
+        try:
+            self.logger.debug(u"Update webhook for " + smsDevice.name)
+            self.twilioClient.messages.create(to=to, from_=smsNumber, body=message)
+            smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
+            smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+        except TwilioException as e:
+            self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
+            smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
+            smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+        else:
+            broadcastDict = {'messageFrom': smsNumber, 'messageTo': to, 'messageText': message}
+            indigo.server.broadcastToSubscribers(u"messageSent", broadcastDict)
+
 
 
     def listNotifications(self):

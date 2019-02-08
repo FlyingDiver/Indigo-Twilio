@@ -108,4 +108,8 @@
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>
 	</Action>
+	<Action id="updateWebhook" deviceFilter="self.twilioNumber">
+		<Name>Update Webhook</Name>
+        <CallbackMethod>updateWebhook</CallbackMethod>
+	</Action>
 </Actions>
