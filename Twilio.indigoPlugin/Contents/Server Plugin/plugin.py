@@ -152,10 +152,6 @@ class Plugin(indigo.PluginBase):
         self.logger.debug(u"validatePrefsConfigUi called")
         errorDict = indigo.Dict()
 
-        updateFrequency = int(valuesDict['updateFrequency'])
-        if (updateFrequency < 0) or (updateFrequency > 24):
-            errorDict['updateFrequency'] = u"Update frequency is invalid - enter a valid number (between 0 and 24)"
-
         accountSID = valuesDict['accountSID']
         if len(accountSID) < 30:
             errorDict['accountSID'] = u"Enter Account SID from Twilio Console Dashboard"
@@ -188,10 +184,6 @@ class Plugin(indigo.PluginBase):
             self.pollFrequency = float(self.pluginPrefs.get('pollFrequency', "10")) * 60.0
             self.logger.debug(u"pollFrequency = " + str(self.pollFrequency))
             self.next_poll = time.time()
-
-            self.updateFrequency = float(self.pluginPrefs.get('updateFrequency', "24")) * 60.0 * 60.0
-            self.logger.debug(u"updateFrequency = " + str(self.updateFrequency))
-            self.next_update_check = time.time()
 
 
     ########################################
@@ -406,11 +398,9 @@ class Plugin(indigo.PluginBase):
 
     def checkMessagesHook(self, hookData):
         self.logger.debug(u"checkMessagesHook: hookData: {}".format(hookData))
-        if hookData["name"] == u"twilioCheck":
+        if hookData.get("name") == u"twilioCheck":
             self.checkAllMessages()
     
-    
-
     def checkMessagesAction(self, pluginAction, twilioDevice):
         self.checkMessages(twilioDevice)
 
