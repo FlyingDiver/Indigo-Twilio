@@ -59,12 +59,16 @@ class Plugin(indigo.PluginBase):
         else:
             self.logger.warning(u"accountSID and/or authToken not set")
             self.twilioClient = None
-
-        number_list = self.twilioClient.incoming_phone_numbers.list()
-        for number in number_list:
-            self.logger.debug(u"Twilio SID = {}, number = {}, sms webhook = {}".format(number.sid, number.phone_number, number.sms_url))
                      
-        indigo.server.subscribeToBroadcast("com.flyingdiver.indigoplugin.httpd", u"httpd_webhook-twilio", "checkMessagesHook")
+        httpd_plugin = indigo.server.getPlugin("com.flyingdiver.indigoplugin.httpd")
+        if not httpd_plugin.isEnabled:
+            return
+
+        self.webhook_info = httpd_plugin.executeAction("getWebhookInfo", deviceId=0, props={u"name": self.pluginId}, waitUntilDone=True)
+        if not self.webhook_info:
+            return
+
+        indigo.server.subscribeToBroadcast("com.flyingdiver.indigoplugin.httpd", self.webhook_info["hook_name"], "checkMessagesHook")
 
 
     def shutdown(self):
@@ -466,19 +470,14 @@ class Plugin(indigo.PluginBase):
 
     def updateWebhooks(self):
 
-        httpd_plugin = indigo.server.getPlugin("com.flyingdiver.indigoplugin.httpd")
-        if not httpd_plugin.isEnabled:
-            return
-                    
-        webhook_url = httpd_plugin.executeAction("getWebhookInfo", deviceId=0, waitUntilDone=True).get("http", None)
+        webhook_url = self.webhook_info.get("http", None)
         if not webhook_url:
             return    
-        new_url = webhook_url+"/webhook-twilio"
         
         number_list = self.twilioClient.incoming_phone_numbers.list()
         for number in number_list:
             try:            
-                updated = number.update(sms_url=new_url)
+                updated = number.update(sms_url=webhook_url, sms_method = "GET")
                 self.logger.info(u"Updated Webhook URL for {} to {}".format(updated.phone_number, updated.sms_url))            
             except TwilioException as e:
                 self.logger.exception(u"{}: phone_number.update error: {}".format(number.phone_number, e))
