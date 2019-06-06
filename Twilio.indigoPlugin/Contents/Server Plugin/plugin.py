@@ -15,7 +15,7 @@ import json
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
 
-kCurDevVersCount = 1        # current version of plugin devices
+kCurDevVersCount = 2        # current version of plugin devices
 
 kAnyDevice      = "ANYDEVICE"
 kOtherContact   = "OTHER-NON-CONTACT"
@@ -61,7 +61,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient = None
                      
         httpd_plugin = indigo.server.getPlugin("com.flyingdiver.indigoplugin.httpd")
-        if not httpd_plugin.isEnabled:
+        if not httpd_plugin.isEnabled():
             return
 
         self.webhook_info = httpd_plugin.executeAction("getWebhookInfo", deviceId=0, props={u"name": self.pluginId}, waitUntilDone=True)
@@ -210,12 +210,14 @@ class Plugin(indigo.PluginBase):
         elif instanceVers < kCurDevVersCount:
             newProps = device.pluginProps
             newProps["devVersCount"] = kCurDevVersCount
+            newProps["address"] = device.pluginProps["twilioNumber"]
             device.replacePluginPropsOnServer(newProps)
             self.logger.debug(u"deviceStartComm: Updated " + device.name + " to version " + str(kCurDevVersCount))
 
         else:
             self.logger.warning(u"Unknown device version: " + str(instanceVers) + " for device " + device.name)
 
+        
         device.stateListOrDisplayStateIdChanged()
  
 
