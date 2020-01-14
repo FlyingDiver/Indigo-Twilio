@@ -271,7 +271,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.messages.create(to=to, from_=smsNumber, body=message)
             smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
             smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -305,7 +305,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=urlList)
             mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"sendMMS twilioClient.messages.create error: %s" % e)
             mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -337,7 +337,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"voiceCall twilioClient.calls.create error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -365,7 +365,7 @@ class Plugin(indigo.PluginBase):
             self.twilioClient.calls.create(to=to, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"voiceMessage twilioClient.calls.create error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -400,7 +400,7 @@ class Plugin(indigo.PluginBase):
             callDevice.updateStateOnServer(key="last_auth", value=auth)
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Activated")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"doFlow twilioClient.studio.flows error: %s" % e)
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -443,7 +443,7 @@ class Plugin(indigo.PluginBase):
                         else:
                             self.logger.exception(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
 
-        except TwilioException as e:
+        except Exception as e:
             self.logger.exception(u"checkMessages: twilioClient.messages.list error: %s" % e)
             twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
             twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
