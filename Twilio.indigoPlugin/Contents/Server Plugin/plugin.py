@@ -60,17 +60,7 @@ class Plugin(indigo.PluginBase):
             self.logger.warning(u"accountSID and/or authToken not set")
             self.twilioClient = None
                      
-        httpd_plugin = indigo.server.getPlugin("com.flyingdiver.indigoplugin.httpd")
-        if not httpd_plugin.isEnabled():
-            return
-
-        self.webhook_info = httpd_plugin.executeAction("getWebhookInfo", deviceId=0, props={u"name": self.pluginId}, waitUntilDone=True)
-        if not self.webhook_info:
-            return
-
-        indigo.server.subscribeToBroadcast("com.flyingdiver.indigoplugin.httpd", self.webhook_info["hook_name"], "checkMessagesHook")
-
-
+                     
     def shutdown(self):
         self.logger.info(u"Shutting down Twilio")
 
@@ -406,10 +396,6 @@ class Plugin(indigo.PluginBase):
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
     ########################################
-
-    def checkMessagesHook(self, hookData):
-        self.logger.debug(u"checkMessagesHook - hookData: {}".format(hookData))
-        self.checkAllMessages()
 
     def checkMessagesAction(self, pluginAction, twilioDevice):
         self.checkMessages(twilioDevice)
