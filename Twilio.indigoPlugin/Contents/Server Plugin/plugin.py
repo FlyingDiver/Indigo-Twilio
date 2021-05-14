@@ -89,7 +89,7 @@ class Plugin(indigo.PluginBase):
 
                 self.sleep(60.0)
 
-        except self.stopThread:
+        except self.StopThread:
             pass
 
     ####################
