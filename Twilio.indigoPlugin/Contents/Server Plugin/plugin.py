@@ -449,13 +449,6 @@ class Plugin(indigo.PluginBase):
             if (dev.deviceTypeId == "twilioNumber"):
                 self.checkMessages(dev)
 
-
-    def listNotifications(self):
-        for notification in self.twilioClient.notifications.list():
-            print notification.more_info
-            self.logger.debug(u"listNotifications: Date: %s, Level: %s, Code: %s" % (notification.message_date, notification.log, notification.error_code))
-
-
     def updateWebhooks(self):
 
         webhook_url = self.webhook_info.get("http", None)

@@ -11,11 +11,7 @@
         <CallbackMethod>checkAllMessages</CallbackMethod>
 	</MenuItem>
 	<MenuItem id="titleSeparator0" type="separator" />
-	<MenuItem id="listNotifications">
-		<Name>List Notifications to Log</Name>
-        <CallbackMethod>listNotifications</CallbackMethod>
-	</MenuItem>
-	<MenuItem id="titleSeparator1" type="separator" />
+
 	<MenuItem id="updateWebhooks">
 		<Name>Update Webhooks</Name>
         <CallbackMethod>updateWebhooks</CallbackMethod>
