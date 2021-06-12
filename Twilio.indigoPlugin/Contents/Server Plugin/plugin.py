@@ -420,14 +420,14 @@ class Plugin(indigo.PluginBase):
                         broadcastDict = {'messageFrom': message.from_, 'messageTo': message.to, 'messageText': message.body}
                         indigo.server.broadcastToSubscribers(u"messageReceived", broadcastDict)
 
-                if deleteMsgs:
-                    try:
-                        self.twilioClient.messages(message.sid).delete()
-                    except TwilioException as e:
-                        if e[0:6] == "HTTP 4":
-                            self.logger.warning(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
-                        else:
-                            self.logger.exception(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
+                    if deleteMsgs:
+                        try:
+                            self.twilioClient.messages(message.sid).delete()
+                        except TwilioException as e:
+                            if e[0:6] == "HTTP 4":
+                                self.logger.warning(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
+                            else:
+                                self.logger.exception(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
 
         except Exception as e:
             self.logger.exception(u"checkMessages: twilioClient.messages.list error: %s" % e)
