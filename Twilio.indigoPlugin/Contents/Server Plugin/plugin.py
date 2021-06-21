@@ -404,10 +404,11 @@ class Plugin(indigo.PluginBase):
 
         deleteMsgs = twilioDevice.pluginProps.get('delete', False)
         lastMessageStamp =  datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"), '%Y-%m-%d %H:%M:%S')
+        self.logger.debug(u"checkMessages: checking {}, lastMessageStamp {}".format(twilioDevice.name, lastMessageStamp))
         messageStamp = lastMessageStamp
 
         try:
-            for message in self.twilioClient.messages.list():
+            for message in self.twilioClient.messages.list(to=twilioDevice.address):
                 self.logger.debug(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (message.from_, message.to, message.direction, message.date_sent))
                 if message.date_sent and (message.date_sent.replace(tzinfo=pytz.UTC) > lastMessageStamp.replace(tzinfo=pytz.UTC)):
                     messageStamp = message.date_sent
@@ -446,7 +447,7 @@ class Plugin(indigo.PluginBase):
 
     def checkAllMessages(self):
         for dev in indigo.devices.iter("self"):
-            if (dev.deviceTypeId == "twilioNumber"):
+            if (dev.deviceTypeId == "twilioNumber") and dev.enabled:
                 self.checkMessages(dev)
 
     def updateWebhooks(self):
