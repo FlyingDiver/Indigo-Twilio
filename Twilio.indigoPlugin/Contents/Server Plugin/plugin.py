@@ -201,7 +201,10 @@ class Plugin(indigo.PluginBase):
         elif instanceVers < kCurDevVersCount:
             newProps = device.pluginProps
             newProps["devVersCount"] = kCurDevVersCount
-            newProps["address"] = device.pluginProps["twilioNumber"]
+            
+            if device.deviceTypeId == 'twilioNumber':
+                newProps["address"] = device.pluginProps["twilioNumber"]
+                
             device.replacePluginPropsOnServer(newProps)
             self.logger.debug(u"deviceStartComm: Updated " + device.name + " to version " + str(kCurDevVersCount))
 
