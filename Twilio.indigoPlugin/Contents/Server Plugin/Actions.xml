@@ -108,4 +108,8 @@
 		<Name>Check for Messages</Name>
         <CallbackMethod>checkMessagesAction</CallbackMethod>
 	</Action>
+	<Action id="check_messages" uiPath="hidden">
+		<Name>Callback webHook</Name>
+        <CallbackMethod>webHook</CallbackMethod>
+	</Action>
 </Actions>

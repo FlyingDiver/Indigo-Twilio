@@ -11,6 +11,7 @@ import logging
 import random
 import string
 import json
+import threading
 
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
@@ -441,6 +442,23 @@ class Plugin(indigo.PluginBase):
             twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
             self.logger.debug(u"checkMessages: Done")
 
+
+    ########################################
+    ### Indigo 2021 HTTP Request handling
+    ########################################
+    
+    def webHook(self, action, dev=None, callerWaitingForResult=None):
+        self.logger.debug(u"webHook activated")
+        
+        # run check in separate thread.  Allows immediate return to server, and delay for Twilio bug
+        threading.Timer(3.0, lambda: self.checkAllMessages()).start()
+
+        reply_dict = {"status": 200}
+        reply_dict["headers"] = {"Content-Type": "text/html; charset=UTF-8", }
+        reply_dict["content"] = "<!doctype html><html><head><title>None</title></head><body></body></html>"
+        return reply_dict
+        
+               
     ########################################
     # Menu Methods
     ########################################
@@ -449,20 +467,6 @@ class Plugin(indigo.PluginBase):
         for dev in indigo.devices.iter("self"):
             if (dev.deviceTypeId == "twilioNumber") and dev.enabled:
                 self.checkMessages(dev)
-
-    def updateWebhooks(self):
-
-        webhook_url = self.webhook_info.get("http", None)
-        if not webhook_url:
-            return    
-        
-        number_list = self.twilioClient.incoming_phone_numbers.list()
-        for number in number_list:
-            try:            
-                updated = number.update(sms_url=webhook_url, sms_method = "GET")
-                self.logger.info(u"Updated Webhook URL for {} to {}".format(updated.phone_number, updated.sms_url))            
-            except TwilioException as e:
-                self.logger.exception(u"{}: phone_number.update error: {}".format(number.phone_number, e))
 
 
     def pickTwilioNumber(self, filter=None, valuesDict=None, typeId=0, targetId=0):
