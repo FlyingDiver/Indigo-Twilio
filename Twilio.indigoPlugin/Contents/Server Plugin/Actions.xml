@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Actions>
 	<SupportURL>http://forums.indigodomo.com/viewforum.php?f=213</SupportURL>
-	<Action id="sendSMS" deviceFilter="self.twilioNumber">
+	<Action id="sendSMS" uiPath="NotificationActions" deviceFilter="self.twilioNumber">
 		<Name>Send Text Message (SMS)</Name>
 		<CallbackMethod>sendSMSAction</CallbackMethod>
 		<ConfigUI>
@@ -21,7 +21,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="sendMMS" deviceFilter="self.twilioNumber">
+	<Action id="sendMMS" uiPath="NotificationActions" deviceFilter="self.twilioNumber">
 		<Name>Send Picture Message (MMS)</Name>
 		<CallbackMethod>sendMMSAction</CallbackMethod>
 		<ConfigUI>
@@ -44,8 +44,8 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="voiceCall" deviceFilter="self.twilioNumber">
-		<Name>Place a Call</Name>
+	<Action id="voiceCall" uiPath="NotificationActions" deviceFilter="self.twilioNumber">
+		<Name>Place a Music Call</Name>
 		<CallbackMethod>voiceCallAction</CallbackMethod>
 		<ConfigUI>
         	<Field id="twilioContact" type="menu">
@@ -56,7 +56,7 @@
 				<Label>To:</Label>
 			</Field>
 			<Field id="bucket" type="menu" defaultValue="com.twilio.music.ambient">
-				<Label>Hold Music Style:</Label>
+				<Label>Music Style:</Label>
 				<List>
 					<Option value="com.twilio.music.ambient">Ambient</Option>
 					<Option value="com.twilio.music.classical">Classical</Option>
@@ -69,7 +69,7 @@
 			</Field>			
 		</ConfigUI>
 	</Action>
-	<Action id="voiceMessage" deviceFilter="self.twilioNumber">
+	<Action id="voiceMessage" uiPath="NotificationActions" deviceFilter="self.twilioNumber">
 		<Name>Place a Message Call</Name>
 		<CallbackMethod>voiceMessageAction</CallbackMethod>
 		<ConfigUI>
