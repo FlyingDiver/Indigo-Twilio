@@ -253,18 +253,19 @@ class FactorContext(InstanceContext):
                config_notification_token=values.unset,
                config_sdk_version=values.unset, config_time_step=values.unset,
                config_skew=values.unset, config_code_length=values.unset,
-               config_alg=values.unset):
+               config_alg=values.unset, config_notification_platform=values.unset):
         """
         Update the FactorInstance
 
         :param unicode auth_payload: Optional payload to verify the Factor for the first time
         :param unicode friendly_name: The friendly name of this Factor
-        :param unicode config_notification_token: For APN, the device token. For FCM the registration token
+        :param unicode config_notification_token: For APN, the device token. For FCM, the registration token
         :param unicode config_sdk_version: The Verify Push SDK version used to configure the factor
         :param unicode config_time_step: How often, in seconds, are TOTP codes generated
         :param unicode config_skew: The number of past and future time-steps valid at a given time
         :param unicode config_code_length: Number of digits for generated TOTP codes
         :param FactorInstance.TotpAlgorithms config_alg: The algorithm used to derive the TOTP codes
+        :param unicode config_notification_platform: The transport technology used to generate the Notification Token
 
         :returns: The updated FactorInstance
         :rtype: twilio.rest.verify.v2.service.entity.factor.FactorInstance
@@ -278,6 +279,7 @@ class FactorContext(InstanceContext):
             'Config.Skew': config_skew,
             'Config.CodeLength': config_code_length,
             'Config.Alg': config_alg,
+            'Config.NotificationPlatform': config_notification_platform,
         })
 
         payload = self._version.update(method='POST', uri=self._uri, data=data, )
@@ -316,6 +318,7 @@ class FactorInstance(InstanceResource):
     class NotificationPlatforms(object):
         APN = "apn"
         FCM = "fcm"
+        NONE = "none"
 
     class TotpAlgorithms(object):
         SHA1 = "sha1"
@@ -491,18 +494,19 @@ class FactorInstance(InstanceResource):
                config_notification_token=values.unset,
                config_sdk_version=values.unset, config_time_step=values.unset,
                config_skew=values.unset, config_code_length=values.unset,
-               config_alg=values.unset):
+               config_alg=values.unset, config_notification_platform=values.unset):
         """
         Update the FactorInstance
 
         :param unicode auth_payload: Optional payload to verify the Factor for the first time
         :param unicode friendly_name: The friendly name of this Factor
-        :param unicode config_notification_token: For APN, the device token. For FCM the registration token
+        :param unicode config_notification_token: For APN, the device token. For FCM, the registration token
         :param unicode config_sdk_version: The Verify Push SDK version used to configure the factor
         :param unicode config_time_step: How often, in seconds, are TOTP codes generated
         :param unicode config_skew: The number of past and future time-steps valid at a given time
         :param unicode config_code_length: Number of digits for generated TOTP codes
         :param FactorInstance.TotpAlgorithms config_alg: The algorithm used to derive the TOTP codes
+        :param unicode config_notification_platform: The transport technology used to generate the Notification Token
 
         :returns: The updated FactorInstance
         :rtype: twilio.rest.verify.v2.service.entity.factor.FactorInstance
@@ -516,6 +520,7 @@ class FactorInstance(InstanceResource):
             config_skew=config_skew,
             config_code_length=config_code_length,
             config_alg=config_alg,
+            config_notification_platform=config_notification_platform,
         )
 
     def __repr__(self):

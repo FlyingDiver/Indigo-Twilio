@@ -218,6 +218,9 @@ class ConfigurationInstance(InstanceResource):
             'notifications': payload.get('notifications'),
             'markdown': payload.get('markdown'),
             'url': payload.get('url'),
+            'flex_insights_hr': payload.get('flex_insights_hr'),
+            'flex_insights_drilldown': payload.get('flex_insights_drilldown'),
+            'flex_url': payload.get('flex_url'),
         }
 
         # Context
@@ -548,6 +551,30 @@ class ConfigurationInstance(InstanceResource):
         :rtype: unicode
         """
         return self._properties['url']
+
+    @property
+    def flex_insights_hr(self):
+        """
+        :returns: Object that controls workspace reporting
+        :rtype: dict
+        """
+        return self._properties['flex_insights_hr']
+
+    @property
+    def flex_insights_drilldown(self):
+        """
+        :returns: Setting to enable Flex UI redirection
+        :rtype: bool
+        """
+        return self._properties['flex_insights_drilldown']
+
+    @property
+    def flex_url(self):
+        """
+        :returns: URL to redirect to in case drilldown is enabled.
+        :rtype: unicode
+        """
+        return self._properties['flex_url']
 
     def fetch(self, ui_version=values.unset):
         """

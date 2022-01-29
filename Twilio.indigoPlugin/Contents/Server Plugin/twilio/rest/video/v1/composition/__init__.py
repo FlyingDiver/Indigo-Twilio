@@ -16,9 +16,6 @@ from twilio.base.page import Page
 
 
 class CompositionList(ListResource):
-    """ PLEASE NOTE that this class contains preview products that are subject
-    to change. Use them with caution. If you currently do not have developer
-    preview access, please contact help@twilio.com. """
 
     def __init__(self, version):
         """
@@ -221,9 +218,6 @@ class CompositionList(ListResource):
 
 
 class CompositionPage(Page):
-    """ PLEASE NOTE that this class contains preview products that are subject
-    to change. Use them with caution. If you currently do not have developer
-    preview access, please contact help@twilio.com. """
 
     def __init__(self, version, response, solution):
         """
@@ -262,9 +256,6 @@ class CompositionPage(Page):
 
 
 class CompositionContext(InstanceContext):
-    """ PLEASE NOTE that this class contains preview products that are subject
-    to change. Use them with caution. If you currently do not have developer
-    preview access, please contact help@twilio.com. """
 
     def __init__(self, version, sid):
         """
@@ -314,9 +305,6 @@ class CompositionContext(InstanceContext):
 
 
 class CompositionInstance(InstanceResource):
-    """ PLEASE NOTE that this class contains preview products that are subject
-    to change. Use them with caution. If you currently do not have developer
-    preview access, please contact help@twilio.com. """
 
     class Status(object):
         ENQUEUED = "enqueued"
@@ -356,6 +344,7 @@ class CompositionInstance(InstanceResource):
             'bitrate': deserialize.integer(payload.get('bitrate')),
             'size': deserialize.integer(payload.get('size')),
             'duration': deserialize.integer(payload.get('duration')),
+            'media_external_location': payload.get('media_external_location'),
             'url': payload.get('url'),
             'links': payload.get('links'),
         }
@@ -504,6 +493,14 @@ class CompositionInstance(InstanceResource):
         :rtype: unicode
         """
         return self._properties['duration']
+
+    @property
+    def media_external_location(self):
+        """
+        :returns: The URL of the media file associated with the composition when stored externally
+        :rtype: unicode
+        """
+        return self._properties['media_external_location']
 
     @property
     def url(self):

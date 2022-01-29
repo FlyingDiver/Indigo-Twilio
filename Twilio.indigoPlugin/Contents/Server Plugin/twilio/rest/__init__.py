@@ -11,11 +11,11 @@ import platform
 from twilio import __version__
 from twilio.base.exceptions import TwilioException
 from twilio.base.obsolete import obsolete_client
-from twilio.compat import (
+from twilio.http.http_client import TwilioHttpClient
+from urllib.parse import (
     urlparse,
     urlunparse,
 )
-from twilio.http.http_client import TwilioHttpClient
 
 
 class Client(object):
@@ -28,7 +28,7 @@ class Client(object):
 
         :param str username: Username to authenticate with
         :param str password: Password to authenticate with
-        :param str account_sid: Account Sid, defaults to Username
+        :param str account_sid: Account SID, defaults to Username
         :param str region: Twilio Region to make requests to, defaults to 'us1' if an edge is provided
         :param HttpClient http_client: HttpClient, defaults to TwilioHttpClient
         :param dict environment: Environment to look for auth details, defaults to os.environ
@@ -67,9 +67,11 @@ class Client(object):
         self._events = None
         self._fax = None
         self._flex_api = None
+        self._frontline_api = None
         self._insights = None
         self._ip_messaging = None
         self._lookups = None
+        self._media = None
         self._messaging = None
         self._monitor = None
         self._notify = None
@@ -277,6 +279,19 @@ class Client(object):
         return self._flex_api
 
     @property
+    def frontline_api(self):
+        """
+        Access the FrontlineApi Twilio Domain
+
+        :returns: FrontlineApi Twilio Domain
+        :rtype: twilio.rest.frontline_api.FrontlineApi
+        """
+        if self._frontline_api is None:
+            from twilio.rest.frontline_api import FrontlineApi
+            self._frontline_api = FrontlineApi(self)
+        return self._frontline_api
+
+    @property
     def insights(self):
         """
         Access the Insights Twilio Domain
@@ -314,6 +329,19 @@ class Client(object):
             from twilio.rest.lookups import Lookups
             self._lookups = Lookups(self)
         return self._lookups
+
+    @property
+    def media(self):
+        """
+        Access the Media Twilio Domain
+
+        :returns: Media Twilio Domain
+        :rtype: twilio.rest.media.Media
+        """
+        if self._media is None:
+            from twilio.rest.media import Media
+            self._media = Media(self)
+        return self._media
 
     @property
     def messaging(self):
