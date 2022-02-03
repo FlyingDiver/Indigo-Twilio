@@ -110,6 +110,6 @@
 	</Action>
 	<Action id="check_messages" uiPath="hidden">
 		<Name>Callback webHook</Name>
-        <CallbackMethod>webHook</CallbackMethod>
+        <CallbackMethod>checkMessagesWebHook</CallbackMethod>
 	</Action>
 </Actions>
