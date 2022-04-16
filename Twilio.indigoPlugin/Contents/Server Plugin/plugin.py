@@ -5,7 +5,6 @@
 import sys
 import time
 from datetime import datetime
-import pytz
 import urllib
 import logging
 import random
@@ -13,6 +12,7 @@ import string
 import json
 import threading
 
+import pytz
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
 
@@ -375,16 +375,13 @@ class Plugin(indigo.PluginBase):
     def checkMessages(self, twilioDevice):
 
         deleteMsgs = twilioDevice.pluginProps.get('delete', False)
-        lastMessageStamp = datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"),
-                                             '%Y-%m-%d %H:%M:%S')
-        self.logger.debug(
-            u"checkMessages: checking {}, lastMessageStamp {}".format(twilioDevice.name, lastMessageStamp))
+        lastMessageStamp = datetime.strptime(self.pluginPrefs.get(u"lastMessageStamp", "2000-01-01 00:00:00"),'%Y-%m-%d %H:%M:%S')
+        self.logger.debug(f"checkMessages: checking {twilioDevice.name}, lastMessageStamp {lastMessageStamp}")
         messageStamp = lastMessageStamp
 
         try:
             for message in self.twilioClient.messages.list(to=twilioDevice.address):
-                self.logger.debug(u"checkMessages: Message from %s, to: %s, direction: %s, date_sent: '%s'" % (
-                    message.from_, message.to, message.direction, message.date_sent))
+                self.logger.debug(f"checkMessages: Message from {message.from_}, to: {message.to}, direction: {message.direction}, date_sent: '{message.date_sent}'")
                 if message.date_sent and (
                         message.date_sent.replace(tzinfo=pytz.UTC) > lastMessageStamp.replace(tzinfo=pytz.UTC)):
                     messageStamp = message.date_sent
@@ -403,12 +400,12 @@ class Plugin(indigo.PluginBase):
                             self.twilioClient.messages(message.sid).delete()
                         except TwilioException as e:
                             if e[0:6] == "HTTP 4":
-                                self.logger.warning(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
+                                self.logger.warning(f"checkMessages: twilioClient.messages.delete() error: {e}")
                             else:
-                                self.logger.exception(u"checkMessages: twilioClient.messages.delete() error: %s" % e)
+                                self.logger.exception(f"checkMessages: twilioClient.messages.delete() error: {e}")
 
         except Exception as e:
-            self.logger.exception(u"checkMessages: twilioClient.messages.list error: %s" % e)
+            self.logger.exception(f"checkMessages: twilioClient.messages.list error: {e}")
             twilioDevice.updateStateOnServer(key="numberStatus", value="Error")
             twilioDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
