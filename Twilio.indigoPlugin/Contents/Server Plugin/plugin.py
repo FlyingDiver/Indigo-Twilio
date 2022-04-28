@@ -90,7 +90,7 @@ class Plugin(indigo.PluginBase):
 
     def triggerCheck(self, device):
 
-        for triggerId, trigger in sorted(self.triggers.iteritems()):
+        for triggerId, trigger in sorted(self.triggers.items()):
             self.logger.debug(f'Checking Trigger {trigger.name} ({trigger.id}), Type: {trigger.pluginTypeId}')
 
             if (trigger.pluginProps["twilioNumber"] != str(device.id)) and (
