@@ -35,7 +35,7 @@ class Plugin(indigo.PluginBase):
                                  datefmt='%Y-%m-%d %H:%M:%S')
         self.plugin_file_handler.setFormatter(pfmt)
 
-        self.logLevel = int(self.pluginPrefs.get(u"logLevel", logging.INFO))
+        self.logLevel = int(self.pluginPrefs.get("logLevel", logging.INFO))
         self.indigo_log_handler.setLevel(self.logLevel)
         self.logger.debug(f"logLevel = {self.logLevel}")
 
@@ -146,11 +146,11 @@ class Plugin(indigo.PluginBase):
 
         accountSID = valuesDict['accountSID']
         if len(accountSID) < 30:
-            errorDict['accountSID'] = u"Enter Account SID from Twilio Console Dashboard"
+            errorDict['accountSID'] = "Enter Account SID from Twilio Console Dashboard"
 
         authToken = valuesDict['authToken']
         if len(authToken) < 30:
-            errorDict['authToken'] = u"Enter Auth Token from Twilio Console Dashboard"
+            errorDict['authToken'] = "Enter Auth Token from Twilio Console Dashboard"
 
         if len(errorDict) > 0:
             return False, valuesDict, errorDict
@@ -228,12 +228,12 @@ class Plugin(indigo.PluginBase):
         message = indigo.activePlugin.substitute(smsMessage)
 
         try:
-            self.logger.debug(u"sendSMS message '" + message + "' to " + to + " using " + smsDevice.name)
+            self.logger.debug(f"sendSMS message '{message}' to {to} using {smsDevice.name}")
             self.twilioClient.messages.create(to=to, from_=smsNumber, body=message)
             smsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except Exception as e:
-            self.logger.exception(u"sendSMS twilioClient.messages.create error: %s" % e)
+            self.logger.exception(f"sendSMS twilioClient.messages.create error: {e}")
             smsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             smsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
         else:
@@ -262,13 +262,12 @@ class Plugin(indigo.PluginBase):
         urlList = urls.split(",")
 
         try:
-            self.logger.debug(
-                u"sendMMS message '" + message + "' to " + to + " using " + mmsDevice.name + " with " + str(urlList))
+            self.logger.debug(f"sendMMS message '{message}' to {to} using {mmsDevice.name} with {urlList}")
             self.twilioClient.messages.create(to=to, from_=mmsNumber, body=message, media_url=urlList)
             mmsDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except Exception as e:
-            self.logger.exception(u"sendMMS twilioClient.messages.create error: %s" % e)
+            self.logger.exception(f"sendMMS twilioClient.messages.create error: {e}")
             mmsDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             mmsDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
         else:
@@ -293,12 +292,12 @@ class Plugin(indigo.PluginBase):
         callNumber = callDevice.pluginProps['twilioNumber']
         callURL = "https://twimlets.com/holdmusic?Bucket=" + bucket
         try:
-            self.logger.debug(f"voiceCall call to {callTo} using {callDevice.name}  with  {callURL}")
+            self.logger.debug(f"voiceCall call to {callTo} using {callDevice.name} with {callURL}")
             self.twilioClient.calls.create(to=callTo, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except Exception as e:
-            self.logger.exception(u"voiceCall twilioClient.calls.create error: %s" % e)
+            self.logger.exception(f"voiceCall twilioClient.calls.create error: {e}")
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -319,14 +318,14 @@ class Plugin(indigo.PluginBase):
         to = indigo.activePlugin.substitute(callTo)
         message = indigo.activePlugin.substitute(messageText)
         callNumber = callDevice.pluginProps['twilioNumber']
-        callURL = "https://twimlets.com/message?" + urllib.quote("Message[0]=" + message, "=")
+        callURL = "https://twimlets.com/message?" + urllib.parse.quote("Message[0]=" + message, "=")
         try:
-            self.logger.debug(u"voiceMessage call to " + to + " using " + callDevice.name + " with " + callURL)
+            self.logger.debug(f"voiceMessage call to {to} using {callDevice.name} with {callURL}")
             self.twilioClient.calls.create(to=to, from_=callNumber, url=callURL)
             callDevice.updateStateOnServer(key="numberStatus", value="Message Sent")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except Exception as e:
-            self.logger.exception(u"voiceMessage twilioClient.calls.create error: %s" % e)
+            self.logger.exception(f"voiceMessage twilioClient.calls.create error: {e}")
             callDevice.updateStateOnServer(key="numberStatus", value="Create Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -348,7 +347,7 @@ class Plugin(indigo.PluginBase):
         to = indigo.activePlugin.substitute(callTo)
         message = indigo.activePlugin.substitute(flowMessage)
         callNumber = callDevice.pluginProps['twilioNumber']
-        callURL = "https://studio.twilio.com/v1/Flows/{}/Engagements".format(flowSID)
+        callURL = f"https://studio.twilio.com/v1/Flows/{flowSID}/Engagements"
         auth = ''.join(
             random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
         params = {
@@ -356,14 +355,14 @@ class Plugin(indigo.PluginBase):
             "message": message
         }
         try:
-            self.logger.debug(u"doFlow call to {} using {} with {}".format(to, callDevice.name, flowSID))
+            self.logger.debug(f"doFlow call to {to} using {callDevice.name} with {flowSID}")
             self.twilioClient.studio.flows(flowSID).engagements.create(to=to, from_=callNumber,
                                                                        parameters=json.dumps(params))
             callDevice.updateStateOnServer(key="last_auth", value=auth)
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Activated")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
         except Exception as e:
-            self.logger.exception(u"doFlow twilioClient.studio.flows error: %s" % e)
+            self.logger.exception(f"doFlow twilioClient.studio.flows error: {e}")
             callDevice.updateStateOnServer(key="numberStatus", value="Flow Failure")
             callDevice.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
