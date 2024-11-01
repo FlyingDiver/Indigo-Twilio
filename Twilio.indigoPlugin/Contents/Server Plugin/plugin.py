@@ -49,10 +49,6 @@ class Plugin(indigo.PluginBase):
         self.authToken = pluginPrefs.get('authToken', False)
         if self.accountSID and self.authToken:
             self.twilioClient = Client(self.accountSID, self.authToken)
-            response = self.twilioClient.request('GET', 'https://api.twilio.com:8443')
-            self.logger.debug(f"Twilio API Check response = {response}")
-            if response.status_code != 200:
-                self.logger.warning('Twilio API Check failed.  Twilio will stop working when the next API version is implemented.')
         else:
             self.logger.warning("accountSID and/or authToken not set")
             self.twilioClient = None
